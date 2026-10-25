@@ -88,6 +88,36 @@
             border-radius: 8px;
         }
 
+        /* Tombol bagikan: hanya tampil di file hasil publish */
+        #btnShare {
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        #btnShare svg {
+            width: 14px;
+            height: 14px;
+            display: block;
+        }
+
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: calc(90px + env(safe-area-inset-bottom, 0px));
+            transform: translateX(-50%);
+            background: var(--btn-active-bg);
+            color: var(--btn-active-text);
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 14px;
+            border-radius: 8px;
+            z-index: 2000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .toast.show { opacity: 1; }
+
         /* Tombol tema: hanya tampil di file hasil publish */
         #btnTheme {
             display: none;
@@ -105,6 +135,7 @@
             color: var(--link);
             text-underline-offset: 2px;
         }
+        a { pointer-events: auto; }
         a:visited { color: var(--link-visited); }
         a:hover { filter: brightness(1.15); }
         :focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
@@ -563,6 +594,7 @@
             </div>
 
             <div class="footer-group">
+                <button class="f-btn" id="btnShare" aria-label="Bagikan link halaman ini" title="Bagikan link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3" fill="currentColor"/><circle cx="6" cy="12" r="3" fill="currentColor"/><circle cx="18" cy="19" r="3" fill="currentColor"/><path d="M8.6 10.5l6.8-4M8.6 13.5l6.8 4"/></svg></button>
                 <button class="f-btn" id="btnTheme" aria-label="Ganti tema terang atau gelap" aria-pressed="false"></button>
                 <button class="f-btn" id="btnDecrease">-A</button>
                 <span class="font-indicator" id="fontIndicator">16px</span>
@@ -997,6 +1029,68 @@
         }
 
         // ==========================================================================
+        // BAGIKAN LINK (alamat halaman yang sedang dibuka)
+        // ==========================================================================
+        const btnShare = document.getElementById('btnShare');
+        let toastTimer = null;
+
+        function showToast(msg) {
+            let t = document.getElementById('toast');
+            if (!t) {
+                t = document.createElement('div');
+                t.id = 'toast';
+                t.className = 'toast';
+                t.setAttribute('role', 'status');
+                document.body.appendChild(t);
+            }
+            t.textContent = msg;
+            // paksa reflow agar transisi berjalan
+            void t.offsetWidth;
+            t.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+        }
+
+        async function copyText(text) {
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(text);
+                    return true;
+                }
+            } catch (e) {}
+            // Cadangan untuk browser/konteks tanpa Clipboard API
+            try {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.setAttribute('readonly', '');
+                ta.style.cssText = 'position:fixed;top:-1000px;opacity:0;';
+                document.body.appendChild(ta);
+                ta.select();
+                const ok = document.execCommand('copy');
+                ta.remove();
+                return ok;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        btnShare.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            // Alamat halaman yang sedang dibuka, tanpa bagian #...
+            const url = window.location.href.split('#')[0];
+            const title = document.title;
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title, url });
+                    return;
+                } catch (err) {
+                    if (err && err.name === 'AbortError') return; // pembaca membatalkan
+                }
+            }
+            showToast((await copyText(url)) ? 'Link disalin' : 'Gagal menyalin link');
+        });
+
+        // ==========================================================================
         // PINDAH HALAMAN DENGAN PANAH KIRI / KANAN (keyboard)
         // Tidak aktif saat kursor sedang berada di teks yang bisa diedit,
         // agar panah tetap menggeser kursor seperti biasa.
@@ -1066,6 +1160,38 @@
         // Penanda halaman terima kasih di file MD (komentar HTML, tak terlihat di penampil MD lain)
         const THANKS_MARKER = '<!-- terimakasih -->';
 
+        // Elemen -> daftar paragraf MD. Tebal, miring, dan tautan dikonversi;
+        // Enter (div/p di dalam paragraf) dan <br> menjadi paragraf terpisah.
+        function blockToParagraphs(el) {
+            const paras = [];
+            let cur = '';
+            const flush = () => { if (cur.trim()) paras.push(cur.trim()); cur = ''; };
+            (function walk(n) {
+                n.childNodes.forEach(c => {
+                    if (c.nodeType === Node.TEXT_NODE) {
+                        cur += c.nodeValue.replace(/\u00a0/g, ' ');
+                    } else if (c.nodeType === Node.ELEMENT_NODE) {
+                        const tag = c.tagName.toLowerCase();
+                        if (tag === 'br') {
+                            flush();
+                        } else if (['div', 'p', 'blockquote', 'h2', 'li'].includes(tag)) {
+                            flush(); walk(c); flush();
+                        } else if (tag === 'b' || tag === 'strong') {
+                            cur += '**'; walk(c); cur += '**';
+                        } else if (tag === 'i' || tag === 'em') {
+                            cur += '*'; walk(c); cur += '*';
+                        } else if (tag === 'a') {
+                            cur += '['; walk(c); cur += `](${c.getAttribute('href') || ''})`;
+                        } else {
+                            walk(c);
+                        }
+                    }
+                });
+            })(el);
+            flush();
+            return paras;
+        }
+
         function buildMarkdown() {
             let mdContent = "";
             // Halaman terima kasih selalu terakhir dan diberi penanda
@@ -1082,21 +1208,17 @@
                 art.childNodes.forEach(node => {
                     if (node.nodeType === Node.ELEMENT_NODE) {
                         const tag = node.tagName.toLowerCase();
-                        let text = node.innerHTML
-                            .replace(/<b>(.*?)<\/b>|<strong>(.*?)<\/strong>/gi, '**$1$2**')
-                            .replace(/<i>(.*?)<\/i>|<em>(.*?)<\/em>/gi, '*$1$2*')
-                            .replace(/<br\s*\/?>/gi, '\n');
 
                         if (tag === 'h1') {
                             mdContent += `# ${node.innerText.trim()}\n\n`;
                         } else if (tag === 'h2') {
-                            mdContent += `## ${node.innerText.trim()}\n\n`;
+                            mdContent += `## ${blockToParagraphs(node).join(' ')}\n\n`;
                         } else if (tag === 'div' && node.classList.contains('meta')) {
                             mdContent += `_${node.innerText.trim()}_\n\n`;
                         } else if (tag === 'blockquote') {
-                            mdContent += `> ${node.innerText.trim()}\n\n`;
+                            blockToParagraphs(node).forEach(t => { mdContent += `> ${t}\n\n`; });
                         } else if (tag === 'p') {
-                            mdContent += `${text.trim()}\n\n`;
+                            blockToParagraphs(node).forEach(t => { mdContent += `${t}\n\n`; });
                         }
                     }
                 });
@@ -1131,6 +1253,34 @@
             reader.readAsText(file);
         }
 
+        // Tautan MD: [teks](alamat). Alamat berbahaya (mis. javascript:) tidak diubah jadi tautan.
+        const MD_LINK_RE = /(?<!!)\[([^\]]+)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
+
+        function safeUrl(u) {
+            u = (u || '').trim();
+            if (!u) return '';
+            const ok = /^(https?:|mailto:|tel:)/i.test(u) || /^[#/.]/.test(u) || !/^[^/?#]*:/.test(u);
+            if (!ok) return '';
+            return u.replace(/&/g, '&amp;').replace(/"/g, '%22').replace(/</g, '%3C').replace(/>/g, '%3E');
+        }
+
+        function mdEmphasis(t) {
+            return t.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\*(.*?)\*/g, '<i>$1</i>');
+        }
+
+        // Teks inline MD -> HTML (tebal, miring, tautan)
+        function mdInline(line) {
+            const links = [];
+            let t = line.replace(MD_LINK_RE, (m, text, url) => {
+                const u = safeUrl(url);
+                if (!u) return text;
+                links.push(`<a href="${u}" target="_blank" rel="noopener noreferrer">${mdEmphasis(text)}</a>`);
+                return `\u0000${links.length - 1}\u0000`;
+            });
+            t = mdEmphasis(t);
+            return t.replace(/\u0000(\d+)\u0000/g, (m, i) => links[Number(i)]);
+        }
+
         // Mengurai satu halaman MD menjadi judul, baris di bawah judul, dan isi (HTML)
         function parseMdPage(pageContent, index) {
             const lines = pageContent.split('\n');
@@ -1144,9 +1294,7 @@
                 let trimmed = line.trim();
                 if (!trimmed) return;
 
-                let parsedLine = line
-                    .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
-                    .replace(/\*(.*?)\*/g, '<i>$1</i>');
+                let parsedLine = mdInline(line);
 
                 if (trimmed.startsWith('# ')) {
                     title = trimmed.replace('# ', '');
@@ -1240,7 +1388,7 @@
         // ==========================================================================
         // META TAGS (SEO + OPEN GRAPH) UNTUK THUMBNAIL SAAT DISHARE
         // ==========================================================================
-        const PUBLISH_BASE_URL = 'https://mhanifpriatama-bit.github.io/ku/';
+        const PUBLISH_BASE_URL = 'https://hnf-nulis.github.io/ku/';
 
         function cutText(text, max) {
             const t = (text || '').replace(/\s+/g, ' ').trim();
@@ -1308,6 +1456,7 @@
                 document.body.classList.add('no-select');
                 editorTools.style.display = 'none';
                 btnTheme.style.display = 'inline-flex';
+                btnShare.style.display = 'inline-flex';
                 document.getElementById('readabilityPanel').style.display = 'none';
             } else {
                 isPublished = false;
@@ -1322,6 +1471,7 @@
                 });
                 editorTools.style.display = 'flex';
                 btnTheme.style.display = '';
+                btnShare.style.display = '';
                 document.getElementById('readabilityPanel').style.display = 'flex';
             }
 

@@ -1,0 +1,1560 @@
+<html lang="id" style="--s: 1; --base-font-size: 16px;"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="light only">
+    <meta name="theme-color" content="#FBF8F3">
+    <title>Siapa Allah (1)</title>
+    <style>
+        :root {
+            --base-font-size: 16px;
+            --color-kurang: #718096;
+            --color-cukup: #ECC94B;
+            --color-bagus: #38A169;
+            --color-agak: #DD6B20;
+            --color-terlalu: #E53E3E;
+
+            /* ===== Tema TERANG (selalu, tidak mengikuti mode gelap browser) ===== */
+            color-scheme: light;
+            --bg: #FBF8F3;            /* latar halaman: off-white hangat */
+            --bg-outer: #EFEAE1;      /* latar di luar kolom (layar lebar) */
+            --text: #2D3748;          /* teks utama */
+            --heading: #1A202C;       /* h1, h2, h3 */
+            --muted: #6B7280;
+            --placeholder: #9AA3AF;
+            --link: #2B6CB0;
+            --link-visited: #6B46C1;
+            --border: rgba(0, 0, 0, 0.08);
+            --shadow: rgba(0, 0, 0, 0.05);
+            --bar-bg: rgba(251, 248, 243, 0.96);
+            --panel-text: #4A5568;
+            --btn-bg: #EDE8DF;
+            --btn-text: #2D3748;
+            --btn-pressed: #DDD6CA;
+            --btn-active-bg: #2D3748;
+            --btn-active-text: #FBF8F3;
+            --primary: #2B6CB0;
+            --primary-text: #FFFFFF;
+            --dot: #CBD5E0;
+            --dot-active: #2D3748;
+            --quote-border: #2D3748;
+            --quote-text: #4A5568;
+            --modal-bg: #FBF8F3;
+            --cancel-bg: #E8E2D8;
+            --cancel-text: #2D3748;
+            /* Tinggi halaman dibatasi seperti layar ponsel (lebar 480px, rasio ~1:2.1),
+               sehingga di mode desktop tidak menjadi sangat panjang. */
+            /* --s = faktor perbesaran (diatur JS) untuk mode desktop di layar sentuh */
+            --s: 1;
+            --page-h: min(100vh, calc(1008px * var(--s)));
+        }
+
+        /* ===== Tema GELAP: hanya aktif jika pembaca mengetuk tombol tema ===== */
+        :root[data-theme="dark"] {
+            color-scheme: dark;
+            --bg: #121212;
+            --bg-outer: #0A0A0A;
+            --text: #E2E8F0;
+            --heading: #F7FAFC;
+            --muted: #A0AEC0;
+            --placeholder: #718096;
+            --link: #90CDF4;
+            --link-visited: #B794F4;
+            --border: rgba(255, 255, 255, 0.10);
+            --shadow: rgba(0, 0, 0, 0.5);
+            --bar-bg: rgba(18, 18, 18, 0.96);
+            --panel-text: #A0AEC0;
+            --btn-bg: #2A2A2E;
+            --btn-text: #E2E8F0;
+            --btn-pressed: #3A3A40;
+            --btn-active-bg: #E2E8F0;
+            --btn-active-text: #121212;
+            --primary: #63B3ED;
+            --primary-text: #0B1220;
+            --dot: #4A5568;
+            --dot-active: #E2E8F0;
+            --quote-border: #A0AEC0;
+            --quote-text: #CBD5E0;
+            --modal-bg: #1E1E22;
+            --cancel-bg: #2D2D33;
+            --cancel-text: #E2E8F0;
+        }
+
+        /* Logo & kode QR berwarna hitam: beri alas terang agar tetap terbaca dan bisa dipindai */
+        :root[data-theme="dark"] .thanks-art {
+            background-color: #FFFFFF;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        /* Tombol bagikan: hanya tampil di file hasil publish */
+        #btnShare {
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        #btnShare svg {
+            width: 14px;
+            height: 14px;
+            display: block;
+        }
+
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: calc(90px + env(safe-area-inset-bottom, 0px));
+            transform: translateX(-50%);
+            background: var(--btn-active-bg);
+            color: var(--btn-active-text);
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 14px;
+            border-radius: 8px;
+            z-index: 2000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .toast.show { opacity: 1; }
+
+        /* Tombol tema: hanya tampil di file hasil publish */
+        #btnTheme {
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        #btnTheme svg {
+            width: 14px;
+            height: 14px;
+            display: block;
+        }
+
+        /* Tautan & elemen interaktif */
+        a {
+            color: var(--link);
+            text-underline-offset: 2px;
+        }
+        a { pointer-events: auto; }
+        a:visited { color: var(--link-visited); }
+        a:hover { filter: brightness(1.15); }
+        :focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: var(--base-font-size);
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg-outer);
+            -webkit-text-size-adjust: 100%;
+            -webkit-tap-highlight-color: transparent;
+            transition: font-size 0.15s ease;
+        }
+
+        .no-select {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        .pages-container {
+            display: flex;
+            width: 100vw;
+            height: var(--page-h);
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .pages-container::-webkit-scrollbar {
+            display: none;
+        }
+        .pages-container {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Satu halaman = selebar layar penuh (agar hanya satu halaman terlihat);
+           isi dibatasi 480px dan diletakkan di tengah pada layar lebar. */
+        .page {
+            flex: 0 0 100vw;
+            width: 100vw;
+            height: var(--page-h);
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        article {
+            zoom: var(--s);
+            width: 100%;
+            max-width: 480px;
+            min-height: 100%;
+            margin: 0 auto;
+            background-color: var(--bg);
+            box-shadow: 0 0 15px var(--shadow);
+            padding: 32px 24px calc(140px + env(safe-area-inset-bottom, 0px)); 
+            outline: none;
+        }
+
+        h1 {
+            font-size: calc(var(--base-font-size) * 1.5);
+            line-height: 1.25;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--heading);
+            margin-bottom: 8px;
+            outline: none;
+        }
+
+        .meta {
+            font-size: calc(var(--base-font-size) * 0.8125);
+            color: var(--muted);
+            margin-bottom: 24px;
+            outline: none;
+        }
+
+        h2 {
+            font-size: calc(var(--base-font-size) * 1.125);
+            line-height: 1.3;
+            font-weight: 600;
+            color: var(--heading);
+            margin-top: 28px;
+            margin-bottom: 12px;
+            outline: none;
+        }
+
+        p {
+            margin-top: 0;
+            margin-bottom: 0.7em;
+            word-wrap: break-word;
+            outline: none;
+        }
+
+        /* Enter di dalam paragraf editable membuat <div> anak (paragraf baru).
+           Beri jarak yang sama dengan jarak antar paragraf. */
+        p > div,
+        blockquote > div {
+            margin-top: 0.7em;
+        }
+
+        blockquote {
+            border-left: 3px solid var(--quote-border);
+            padding-left: 16px;
+            margin: 24px 0;
+            font-style: italic;
+            color: var(--quote-text);
+            outline: none;
+        }
+
+        [contenteditable="true"]:empty:before {
+            content: attr(placeholder);
+            color: var(--placeholder);
+            cursor: text;
+        }
+
+        /* ==========================================================================
+           HALAMAN UCAPAN TERIMA KASIH (selalu terakhir)
+           ========================================================================== */
+        .thanks-footer {
+            margin-top: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        /* Logo QRIS + tulisan + kode QR dalam satu SVG, rata kanan */
+        .thanks-art {
+            display: block;
+            width: 55%;
+            height: auto;
+            margin-left: auto;
+        }
+
+        /* ==========================================================================
+           SMART FLOATING FOOTER & READABILITY PANEL
+           ========================================================================== */
+        .footer-wrapper {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            zoom: var(--s);
+            width: calc(100vw / var(--s));
+            max-width: 480px;
+            z-index: 1000;
+            transition: none;
+            display: flex;
+            flex-direction: column;
+            pointer-events: none;
+        }
+
+        .footer-wrapper > * {
+            pointer-events: auto;
+        }
+
+        /* Readability Panel */
+        .readability-panel {
+            background-color: var(--bar-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border);
+            padding: 6px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--panel-text);
+            box-shadow: 0 -2px 8px var(--shadow);
+            user-select: none;
+        }
+
+        .readability-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .readability-item:hover {
+            opacity: 0.8;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            background-color: var(--color-kurang);
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .reader-footer {
+            height: 54px;
+            background-color: var(--bar-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border);
+            box-shadow: 0 -4px 12px var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+        }
+
+        .footer-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .f-btn {
+            background: var(--btn-bg);
+            color: var(--btn-text);
+            border: none;
+            padding: 6px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .f-btn:active {
+            background: var(--btn-pressed);
+        }
+
+        .f-btn.active {
+            background: var(--btn-active-bg);
+            color: var(--btn-active-text);
+        }
+
+        .f-btn.primary {
+            background: var(--primary);
+            color: var(--primary-text);
+        }
+
+        .font-indicator {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text);
+            min-width: 24px;
+            text-align: center;
+        }
+
+        .page-dots {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background-color: var(--dot);
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background-color: var(--dot-active);
+            width: 10px;
+            border-radius: 3px;
+        }
+
+        /* Modal Styles */
+        .save-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .modal-card {
+            background: var(--modal-bg);
+            color: var(--text);
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 330px;
+            text-align: center;
+        }
+        .modal-card h3 { margin-bottom: 8px; font-size: 17px; }
+        .modal-card p { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+        .modal-btn {
+            width: 100%;
+            padding: 9px;
+            margin-bottom: 8px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-publish { background: #34c759; color: white; }
+        .btn-save-edit { background: #007aff; color: white; }
+        .btn-md { background: #5856d6; color: white; }
+        .btn-reset { background: #ff3b30; color: white; }
+        .btn-cancel { background: var(--cancel-bg); color: var(--cancel-text); }
+        
+        #mdFileInput {
+            display: none;
+        }
+    </style>
+<meta name="description" content="Siapa Allah? Sepertinya itu pertanyaan meremehkan. Layak untuk diketahui? Apa pentingnya?" data-seo="1"><meta property="og:type" content="website" data-seo="1"><meta property="og:title" content="Siapa Allah (1)" data-seo="1"><meta property="og:description" content="Siapa Allah? Sepertinya itu pertanyaan meremehkan. Layak untuk diketahui? Apa pentingnya?" data-seo="1"><meta property="og:url" content="https://hnf-nulis.github.io/ku/siapa-allah-1.html" data-seo="1"><meta property="og:image" content="https://hnf-nulis.github.io/ku/siapa-allah-1.png" data-seo="1"></head>
+<body class="no-select">
+
+    <!-- Hidden Input for Importing MD -->
+    <input type="file" id="mdFileInput" accept=".md,.markdown,.txt" onchange="handleFileImport(event)">
+
+    <!-- Save & Export Options Modal -->
+    
+
+    <!-- Pages Container -->
+    <div class="pages-container" id="pagesContainer"><div class="page">
+                    <article data-sec="CiAgICAgICAgICAgICAgICAgICAgICAgIDxoMSBwbGFjZWhvbGRlcj0iSnVkdWwgQXJ0aWtlbC4uLiI+U2lhcGEgQWxsYWggKDEpPC9oMT4KICAgICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzcz0ibWV0YSIgcGxhY2Vob2xkZXI9Ik9sZWggUGVudWxpcy4uLiI+TW90aWY8L2Rpdj4KICAgICAgICAgICAgICAgICAgICAgICAgPHA+U2lhcGEgQWxsYWg/IFNlcGVydGlueWEgaXR1IHBlcnRhbnlhYW4gbWVyZW1laGthbi4gTGF5YWsgdW50dWsgZGlrZXRhaHVpPyBBcGEgcGVudGluZ255YT8gPC9wPjxwPkl0dSB0aWRhayBwZW50aW5nIGthbGF1IG1lbWFuZyB0aWRhayBwZW50aW5nLiBMaGEga2FsYXUgcGVudGluZyBhdGF1IGJhaGthbiBtYWhhIHBlbnRpbmc/IFVudHVrIGFrdSwga2FtdSwgZGFuIHNldGlhcCBueWF3YT8gPC9wPjxwPk1lbWFuZ255YSB0YWh1bi10YWh1biBrZSBkZXBhbiBzdWRhaCBrdXBhc3Rpa2FuIG5hc2lia3U/IEFwYSBiaXNhIGt1cGFzdGlrYW4gc2VsYW1hIGhpZHVwIHRhayBwZXJuYWggc2FraXQsIGNlbGFrYSwgc2VkaWgsIGxhcmEsIG5lc3RhcGE/IEtpdGEgaW5pIGJlcmdhbnR1bmcga2VwYWRhIGtlc2lhbGFuIGRhbiBrZWJlcnVudHVuZ2FuLiBCYWdhaW1hbmEga2FsYXUgc29zb2sgQWxsYWggaXR1IHlhbmcgbWVuY2lwdGFrYW4gbmFzaWI/IDwvcD48YmxvY2txdW90ZT5LYWxhdSBwZXJrYXJhIG5hc2liLCBwYXN0aWxhaCBwZW50aW5nLiBOYW11biwgYXBha2FoIGJlbmFyPzwvYmxvY2txdW90ZT4KICAgICAgICAgICAgICAgICAgICA="><div class="no-select" style="pointer-events: none;">
+                        <h1 placeholder="Judul Artikel...">Siapa Allah (1)</h1>
+                        <div class="meta" placeholder="Oleh Penulis...">Motif</div>
+                        <p>Siapa Allah? Sepertinya itu pertanyaan meremehkan. Layak untuk diketahui? Apa pentingnya? </p><p>Itu tidak penting kalau memang tidak penting. Lha kalau penting atau bahkan maha penting? Untuk aku, kamu, dan setiap nyawa? </p><p>Memangnya tahun-tahun ke depan sudah kupastikan nasibku? Apa bisa kupastikan selama hidup tak pernah sakit, celaka, sedih, lara, nestapa? Kita ini bergantung kepada kesialan dan keberuntungan. Bagaimana kalau sosok Allah itu yang menciptakan nasib? </p><blockquote>Kalau perkara nasib, pastilah penting. Namun, apakah benar?</blockquote>
+                    </div></article>
+                </div><div class="page">
+                    <article data-sec="CiAgICAgICAgICAgICAgICAgICAgICAgIDxoMSBwbGFjZWhvbGRlcj0iSnVkdWwgQXJ0aWtlbC4uLiI+QWxsYWggUGVuZW50dSBOYXNpYjwvaDE+CiAgICAgICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3M9Im1ldGEiIHBsYWNlaG9sZGVyPSJPbGVoIFBlbnVsaXMuLi4iPlJlZmxla3M8L2Rpdj4KICAgICAgICAgICAgICAgICAgICAgICAgPHA+Q29jb2trYW4gc2FqYSwgYXBhIGJlbmFyIHlhbmcgZGlzZWJ1dCBBbGxhaCBpdHUgcGVuZW50dSBuYXNpYi4gPC9wPjxwPkFkYSBzZWJ1YWggPGI+aW5mbzwvYj4sIEFsbGFoIG1lbXByb2dyYW0gc2VnYWxhIGtlamFkaWFuIHlhbmcgYWRhLiBQcm9ncmFtIGl0dSB0ZXJ0dWxpcyBsZW5na2FwLCBkYW4gc2VnYWxhIHBlcmlzdGl3YSBoYW55YWxhaCBtZW5qYWxhbmthbiBpc2kgcHJvZ3JhbSBpdHUuIDwvcD48cD5IbW0sIGtvayBhbmVoIGtlbGloYXRhbm55YS4gSW5pLCBha3UgYmlzYSBwaWxpaCBzZWtlaGVuZGFra3UsIHdhcm5hIGZhdm9yaXRrdSwga2VzZW5hbmdhbmt1LiBBbmVoLCB0YXBpIDxiPmluZm88L2I+IG1lbmdhdGFrYW4gYmFod2Ega2VoZW5kYWsgZGFuIHBpbGloYW5rdSBqdWdhIHRlcnR1bGlzIGRpIHByb2dyYW0ganVnYS4gQ29iYSwgcGlraXIgYmFpay1iYWlrLiA8L3A+PHA+QW5nZ2FwIGthbGF1IDxiPmluZm88L2I+IGl0dSBiZW5hci4gQWt1IHBpbGloIG1lbWFuY2luZywga29uc2VrdWVuc2lueWEgbXVuZ2tpbiBkYXBhdCBpa2FuLiBBa3UgcGlsaWggdGlkdXIsIGplbGFzIHRpZGFrIGRhcGF0IGlrYW4uIFBpbGloYW5rdSBiZXJha2liYXQgZGFuIGl0dSBrb25zZWt1ZW5zaW55YS4gS2FsYXUgdGVydHVsaXMgZGFwYXQgaWthbiwgdGVudHUgdGVydHVsaXMgYWt1IHBpbGloIG1lbWFuY2luZywgYnVrYW4gdGlkdXIuIDwvcD48cD5CZWJhcyBtZW1pbGloPyBLYWxhdSBzdWR1dCBwYW5kYW5nIG1hbnVzaWEsIGplbGFzIGJlYmFzLiBEYXJpIHN1ZHV0IHBhbmRhbmcgcGVtcm9ncmFtLCBqZWxhcyB0aWRhay4gS2FsYXUgZ2FnYWwgcGFoYW0sIGJhbnlhayB0ZW1hbm55YSwgdXJ1c2FuIHBlbGlrIHNvYWxueWEuIExhaW4gd2FrdHVsYWggZGliYWhhcy4gPC9wPjxibG9ja3F1b3RlPkNlayBkdWx1IGluZm8gaXR1IGJlbmFyIHRpZGFrLiBLYWxhdSBiZW5hciwgd2FoLCBnYXdhdCBhdGF1IGJhZ2FpbWFuYT88L2Jsb2NrcXVvdGU+CiAgICAgICAgICAgICAgICAgICAg"><div class="no-select" style="pointer-events: none;">
+                        <h1 placeholder="Judul Artikel...">Allah Penentu Nasib</h1>
+                        <div class="meta" placeholder="Oleh Penulis...">Refleks</div>
+                        <p>Cocokkan saja, apa benar yang disebut Allah itu penentu nasib. </p><p>Ada sebuah <b>info</b>, Allah memprogram segala kejadian yang ada. Program itu tertulis lengkap, dan segala peristiwa hanyalah menjalankan isi program itu. </p><p>Hmm, kok aneh kelihatannya. Ini, aku bisa pilih sekehendakku, warna favoritku, kesenanganku. Aneh, tapi <b>info</b> mengatakan bahwa kehendak dan pilihanku juga tertulis di program juga. Coba, pikir baik-baik. </p><p>Anggap kalau <b>info</b> itu benar. Aku pilih memancing, konsekuensinya mungkin dapat ikan. Aku pilih tidur, jelas tidak dapat ikan. Pilihanku berakibat dan itu konsekuensinya. Kalau tertulis dapat ikan, tentu tertulis aku pilih memancing, bukan tidur. </p><p>Bebas memilih? Kalau sudut pandang manusia, jelas bebas. Dari sudut pandang pemrogram, jelas tidak. Kalau gagal paham, banyak temannya, urusan pelik soalnya. Lain waktulah dibahas. </p><blockquote>Cek dulu info itu benar tidak. Kalau benar, wah, gawat atau bagaimana?</blockquote>
+                    </div></article>
+                </div><div class="page">
+                    <article data-sec="CiAgICAgICAgICAgICAgICAgICAgICAgIDxoMSBwbGFjZWhvbGRlcj0iSnVkdWwgQXJ0aWtlbC4uLiI+U3VtYmVyIEluZm88L2gxPgogICAgICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzPSJtZXRhIiBwbGFjZWhvbGRlcj0iT2xlaCBQZW51bGlzLi4uIj5DZWsgUmljZWs8L2Rpdj4KICAgICAgICAgICAgICAgICAgICAgICAgPGJsb2NrcXVvdGU+ICJUaWRhayBhZGEgYmVuY2FuYSAoYXBhIHB1bikgeWFuZyBtZW5pbXBhIGRpIGJ1bWkgZGFuIHRpZGFrIChqdWdhIHlhbmcgbWVuaW1wYSkgZGlyaW11LCBrZWN1YWxpIHRlbGFoIHRlcnR1bGlzIGRhbGFtIEtpdGFiIChMYXVoIE1haGZ1eikgc2ViZWx1bSBLYW1pIG1ld3VqdWRrYW5ueWEuIFNlc3VuZ2d1aG55YSBoYWwgaXR1IG11ZGFoIGJhZ2kgQWxsYWguIjwvYmxvY2txdW90ZT48cD5LYWxpbWF0IGRpIGF0YXMgaXR1IGluZm9ueWEuIFRlcmRhcGF0IGRhbGFtIGRva3VtZW4geWFuZyBkaXBlbGloYXJhIHNhbmdhdCBiYW55YWsgbWFudXNpYSwgeWFrbmkgQWwtUXVyYW4uIERva3VtZW4gaGlkdXAgeWFuZyBkaXNpbXBhbiBkYWxhbSBpbmdhdGFuIG1hbnVzaWEgbGViaWggZGFyaSBzZXJpYnUgZW1wYXQgcmF0dXMgdGFodW4uIERpdHJhbnNtaXNpa2FuIHNlY2FyYSBsaXNhbiBkYW4gdHVsaXNhbiBtZWxhbHVpIHBhcmEgcGVuZ2hhZmFsbnlhLCBnZW5lcmFzaSBkZW1pIGdlbmVyYXNpLiA8L3A+PGJsb2NrcXVvdGU+IlRpZGFra2FoIGVuZ2thdSB0YWh1IGJhaHdhIEFsbGFoIG1lbmdldGFodWkgYXBhIHlhbmcgZGkgbGFuZ2l0IGRhbiBkaSBidW1pPyBTdW5nZ3VoLCB5YW5nIGRlbWlraWFuIGl0dSBzdWRhaCB0ZXJkYXBhdCBkYWxhbSBzZWJ1YWggS2l0YWIgKExhdWggTWFoZnV6KS4gU2VzdW5nZ3VobnlhIHlhbmcgZGVtaWtpYW4gaXR1IGFtYXQgbXVkYWggYmFnaSBBbGxhaC4iPC9ibG9ja3F1b3RlPjxwPlNhbGFoIHNhdHUgeWFuZyBtZW5jb2xvaywgYWRhIHVuZ2thcGFuICJtdWRhaCBiYWdpIEFsbGFoIi4gS2FsYXUgZGVtaWtpYW4sIHRhayB0ZXJiYXlhbmdrYW4gc2ViYW55YWsgYXBhIHR1bGlzYW4gbmFzaWIgc2VtZXN0YS4gVGFrIHRlcmtpcmEgc2ViZXJhcGEgTWFoYSBLdWFzYW55YSBEaWEuIFdpaCAuLi4gPC9wPgogICAgICAgICAgICAgICAgICAgIA=="><div class="no-select" style="pointer-events: none;">
+                        <h1 placeholder="Judul Artikel...">Sumber Info</h1>
+                        <div class="meta" placeholder="Oleh Penulis...">Cek Ricek</div>
+                        <blockquote> "Tidak ada bencana (apa pun) yang menimpa di bumi dan tidak (juga yang menimpa) dirimu, kecuali telah tertulis dalam Kitab (Lauh Mahfuz) sebelum Kami mewujudkannya. Sesungguhnya hal itu mudah bagi Allah."</blockquote><p>Kalimat di atas itu infonya. Terdapat dalam dokumen yang dipelihara sangat banyak manusia, yakni Al-Quran. Dokumen hidup yang disimpan dalam ingatan manusia lebih dari seribu empat ratus tahun. Ditransmisikan secara lisan dan tulisan melalui para penghafalnya, generasi demi generasi. </p><blockquote>"Tidakkah engkau tahu bahwa Allah mengetahui apa yang di langit dan di bumi? Sungguh, yang demikian itu sudah terdapat dalam sebuah Kitab (Lauh Mahfuz). Sesungguhnya yang demikian itu amat mudah bagi Allah."</blockquote><p>Salah satu yang mencolok, ada ungkapan "mudah bagi Allah". Kalau demikian, tak terbayangkan sebanyak apa tulisan nasib semesta. Tak terkira seberapa Maha Kuasanya Dia. Wih ... </p>
+                    </div></article>
+                </div><div class="page">
+                    <article data-sec="CiAgICAgICAgICAgICAgICAgICAgICAgIDxoMSBwbGFjZWhvbGRlcj0iSnVkdWwgQXJ0aWtlbC4uLiI+TWFoYSBLdWFzYTwvaDE+CiAgICAgICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3M9Im1ldGEiIHBsYWNlaG9sZGVyPSJPbGVoIFBlbnVsaXMuLi4iPktvbnRlbXBsYXNpPC9kaXY+CiAgICAgICAgICAgICAgICAgICAgICAgIDxwPlNlZ2FsYSBzZXN1YXR1IGFkYWxhaCBhcGxpa2FzaSB5YW5nIGJlcmphbGFuIGRpIGF0YXMga29kZS1rb2RlIHBlbXJvZ3JhbWFuIEFsbGFoLiBEaWEgc2VuZGlyaSB5YW5nIG1lbmphbGFua2FubnlhLiBEYXJpIHNpdHUga2ViYXlhbmcga2VrdWFzYWFuLCBrZWFndW5nYW4sIGtlcGVya2FzYWFuIGRpcmktTnlhLiA8L3A+PHA+S2VhZ3VuZ2FuIEFsbGFoIHRpZGFrIG11bmdraW4gbWVuaW5nZ2Fsa2FuIGtldGVyYXR1cmFuLiBUYW5wYSBpdHUsIHRpZGFrIGFrYW4gYWRhIGh1a3VtIHNlYmFiIGFraWJhdC4gUGFkYWhhbCBhbGFtIHNlbWVzdGEgZGliYW5ndW4gZGVuZ2FuIGh1a3VtIHNlYmFiIGFraWJhdC4gRGlwdWt1bCwgeWEgcnVzYWsgYXRhdSBwZXlvdCwgbWluaW1hbCBsZWNldC4gTWVtaWxpaCBpdHUgc2ViYWIsIGtvbnNla3VlbnNpIGl0dSBha2liYXQuIFlhIC4uLiBiZWdpdHVsYWguIDwvcD48cD5Ba3UgYmVyaGFyYXAsIHRlcnR1bGlzIGRhbGFtIHByb2dyYW0gc2ViYWdhaSBtYW51c2lhIGJlcnVudHVuZy4gS29uc2VrdWVuc2kgeWFuZyBoYXJ1cyBkaXRhbmdndW5nIGF0YXMgcGlsaWhhbmt1LCBqYW5nYW5sYWggbWVydWdpa2FuLiA8L3A+PGJsb2NrcXVvdGU+PGk+QmVydW50dW5nIGRpIGFraGlyIGFkYWxhaCBoYXJhcGFua3UuIEJhZ2FpbWFuYSBjYXJhbnlhPyAoQmVyc2FtYnVuZyk8L2k+PC9ibG9ja3F1b3RlPgogICAgICAgICAgICAgICAgICAgIA=="><div class="no-select" style="pointer-events: none;">
+                        <h1 placeholder="Judul Artikel...">Maha Kuasa</h1>
+                        <div class="meta" placeholder="Oleh Penulis...">Kontemplasi</div>
+                        <p>Segala sesuatu adalah aplikasi yang berjalan di atas kode-kode pemrograman Allah. Dia sendiri yang menjalankannya. Dari situ kebayang kekuasaan, keagungan, keperkasaan diri-Nya. </p><p>Keagungan Allah tidak mungkin meninggalkan keteraturan. Tanpa itu, tidak akan ada hukum sebab akibat. Padahal alam semesta dibangun dengan hukum sebab akibat. Dipukul, ya rusak atau peyot, minimal lecet. Memilih itu sebab, konsekuensi itu akibat. Ya ... begitulah. </p><p>Aku berharap, tertulis dalam program sebagai manusia beruntung. Konsekuensi yang harus ditanggung atas pilihanku, janganlah merugikan. </p><blockquote><i>Beruntung di akhir adalah harapanku. Bagaimana caranya? (Bersambung)</i></blockquote>
+                    </div></article>
+                </div><div class="page thanks-page">
+            <article data-sec="CiAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgCgogICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgPGgxIHBsYWNlaG9sZGVyPSJKdWR1bCBQZW51dHVwLi4uIj5UZXJpbWEgS2FzaWg8L2gxPgogICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3M9Im1ldGEiIHBsYWNlaG9sZGVyPSJNZXRhIGluZm8uLi4iPlNldHVsdXNueWE8L2Rpdj4KICAgICAgICAgICAgICAgICAgICA8cD5UdWxpc2Fua3UgeWFuZyBsYWluLCBzaWxha2FuIGt1bmp1bmdpIDxhIGhyZWY9Imh0dHBzOi8vaG5mLW51bGlzLmdpdGh1Yi5pby9rdSIgdGFyZ2V0PSJfYmxhbmsiIHJlbD0ibm9vcGVuZXIgbm9yZWZlcnJlciI+aHR0cHM6Ly9obmYtbnVsaXMuZ2l0aHViLmlvL2t1PC9hPjwvcD48cD5CaWxhIGluZ2luIGJhZ2lrYW4gdHVsaXNhbiBpbmksIGRpcGVyc2lsYWthbiBrZXR1ayB0b21ib2wgYmVyYmFnaSBkaSBiYXdhaC4gPC9wPgogICAgICAgICAgICAgICAgPGRpdiBjbGFzcz0idGhhbmtzLWZvb3RlciI+CiAgICAgICAgICAgICAgICAgICAgPHN2ZyBjbGFzcz0idGhhbmtzLWFydCIgdmlld0JveD0iNCA0IDU0IDY1IiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IldJUkFIQVNUQSBIQVNJTCBCVU1JIC0gUVJJUyIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzIGlkPSJkZWZzMiI+PC9kZWZzPjxnIGlkPSJnMTEiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIuNDY5Mzc5NiwxLjkzMTUwNDgpIj48cGF0aCBzaGFwZS1yZW5kZXJpbmc9ImNyaXNwRWRnZXMiIHN0cm9rZT0iIzAwMDAwMCIgZD0ibSA0LjA2MTI0MTIsMTYuNjM2OTkgaCA2Ljk5OTk5OTggbSAxLDAgaCAxIG0gMSwwIGggMiBtIDEsMCBoIDEgbSAxLDAgaCAzIG0gMSwwIGggMiBtIDcsMCBoIDIgbSAxLDAgaCAxIG0gMSwwIGggMSBtIDYsMCBoIDEgbSAxLDAgaCA3IG0gLTQ4Ljk5OTk5OTgsMSBoIDEgbSA0Ljk5OTk5OTgsMCBoIDEgbSAzLDAgaCAxIG0gMywwIGggMiBtIDMsMCBoIDEgbSAyLDAgaCAxIG0gMiwwIGggNCBtIDEsMCBoIDEgbSAzLDAgaCA3IG0gMSwwIGggMSBtIDUsMCBoIDEgbSAtNDguOTk5OTk5OCwxIGggMSBtIDEsMCBoIDMgbSAwLjk5OTk5OTgsMCBoIDEgbSAyLDAgaCAxIG0gMSwwIGggNCBtIDUsMCBoIDEgbSAxLDAgaCAyIG0gMywwIGggMiBtIDEsMCBoIDEgbSAyLDAgaCAyIG0gMiwwIGggMSBtIDEsMCBoIDIgbSAxLDAgaCAxIG0gMSwwIGggMyBtIDEsMCBoIDEgbSAtNDguOTk5OTk5OCwxIGggMSBtIDEsMCBoIDMgbSAwLjk5OTk5OTgsMCBoIDEgbSAxLDAgaCAxIG0gMiwwIGggMSBtIDUsMCBoIDIgbSAzLDAgaCAxIG0gMSwwIGggMiBtIDEsMCBoIDUgbSAxLDAgaCAxIG0gMSwwIGggMyBtIDEsMCBoIDEgbSAyLDAgaCAxIG0gMSwwIGggMyBtIDEsMCBoIDEgbSAtNDguOTk5OTk5OCwxIGggMSBtIDEsMCBoIDMgbSAwLjk5OTk5OTgsMCBoIDEgbSAxLDAgaCAzIG0gMywwIGggMSBtIDIsMCBoIDIgbSAzLDAgaCA4IG0gMSwwIGggNCBtIDEsMCBoIDIgbSA0LDAgaCAxIG0gMSwwIGggMyBtIDEsMCBoIDEgbSAtNDguOTk5OTk5OCwxIGggMSBtIDQuOTk5OTk5OCwwIGggMSBtIDEsMCBoIDYgbSAzLDAgaCAxIG0gMSwwIGggMSBtIDEsMCBoIDIgbSAzLDAgaCAxIG0gMSwwIGggMSBtIDEsMCBoIDIgbSAyLDAgaCAyIG0gMiwwIGggMSBtIDMsMCBoIDEgbSA1LDAgaCAxIG0gLTQ4Ljk5OTk5OTgsMSBoIDYuOTk5OTk5OCBtIDEsMCBoIDEgbSAxLDAgaCAxIG0gMSwwIGggMSBtIDEsMCBoIDEgbSAxLDAgaCAxIG0gMSwwIGggMSBtIDEsMCBoIDEgbSAxLDAgaCAxIG0gMSwwIGggMSBtIDEsMCBoIDEgbSAxLDAgaCAxIG0gMSwwIGggMSBtIDEsMCBoIDEgbSAxLDAgaCAxIG0gMSwwIGggMSBtIDEsMCBoIDEgbSAxLDAgaCAxIG0gMSwwIGggNyBtIC00MSwxIGggMSBtIDEsMCBoIDQgbSA1LDAgaCAyIG0gMSwwIGggMSBtIDMsMCBoIDEgbSAyLDAgaCAxIG0gMiwwIGggNCBtIDMsMCBoIDIgbSAtNDAuOTk5OTk5OCwxIGggMSBtIDMsMCBoIDEgbSAwLjk5OTk5OTgsMCBoIDMgbSAyLDAgaCAxIG0gNCwwIGggMSBtIDEsMCBoIDEgbSAxLDAgaCA4IG0gMiwwIGggMyBtIDIsMCBoIDEgbSA1LDAgaCA1IG0gMiwwIGggMSBtIC00OC45OTk5OTk4LDEgaCAxIG0gMSwwIGggMSBtIDIsMCBoIDAuOTk5OTk5OCBtIDMsMCBoIDEgbSAxMiwwIGggMSBtIDMsMCBoIDEgbSA0LDAgaCAxIG0gMiwwIGggMyBtIDEsMCBoIDEgbSAyLDAgaCAyIG0gMSwwIGggMSBtIDMsMCBoIDEgbSAtNDguOTk5OTk5OCwxIGggMyBtIDEsMCBoIDEgbSAwLjk5OTk5OTgsMCBoIDEgbSAxLDAgaCAyIG0gMiwwIGggMSBtIDEsMCBoIDIgbSAxLDAgaCAyIG0gMSwwIGggMiBtIDIsMCBoIDQgbSAxLDAgaCAxIG0gMiwwIGggMSBtIDYsMCBoIDIgbSAzLDAgaCAxIG0gMywwIGggMSBtIC00Ny45OTk5OTk4LDEgaCA0IG0gMi45OTk5OTk4LDAgaCAyIG0gMSwwIGggNCBtIDEsMCBoIDMgbSAzLDAgaCAxIG0gMiwwIGggMSBtIDIsMCBoIDYgbSAyLDAgaCAxIG0gMywwIGggMiBtIDQsMCBoIDIgbSAtNDcuOTk5OTk5OCwxIGggMiBtIDMsMCBoIDIuOTk5OTk5OCBtIDEsMCBoIDUgbSAxLDAgaCAxIG0gMSwwIGggMSBtIDIsMCBoIDEgbSAyLDAgaCAyIG0gMywwIGggMSBtIDEsMCBoIDIgbSA1LDAgaCAzIG0gMiwwIGggMiBtIC00MS45OTk5OTk4LDEgaCAxIG0gMiwwIGggMC45OTk5OTk4IG0gMSwwIGggMSBtIDQsMCBoIDYgbSAxLDAgaCAyIG0gMiwwIGggMSBtIDEsMCBoIDMgbSAyLDAgaCAxIG0gMiwwIGggMSBtIDEsMCBoIDEgbSAyLDAgaCAyIG0gMywwIGggMiBtIDEsMCBoIDEgbSAxLDAgaCAxIG0gLTQ4Ljk5OTk5OTgsMSBoIDUgbSAwLjk5OTk5OTgsMCBoIDIgbSAxLDAgaCAyIG0gMiwwIGggMiBtIDQsMCBoIDEgbSAyLDAgaCAzIG0gNiwwIGggMSBtIDIsMCBoIDEgbSAyLDAgaCAxIG0gOSwwIGggMSBtIC00Ni45OTk5OTk4LDEgaCA0IG0gMS45OTk5OTk4LDAgaCAyIG0gMywwIGggMSBtIDMsMCBoIDEgbSAxLDAgaCAxIG0gMiwwIGggMiBtIDEsMCBoIDEgbSAxLDAgaCAxIG0gMSwwIGggMiBtIDMsMCBoIDIgbSAxLDAgaCAzIG0gMSwwIGggMiBtIDMsMCBoIDEgbSAxLDAgaCAxIG0gLTQ3Ljk5OTk5OTgsMSBoIDIgbSAzLjk5OTk5OTgsMCBoIDMgbSAyLDAgaCAxIG0gMSwwIGggMiBtIDEsMCBoIDEgbSAzLDAgaCAyIG0gMSwwIGggNCBtIDIsMCBoIDQgbSAxLDAgaCA0IG0gMiwwIGggMSBtIDEsMCBoIDMgbSAzLDAgaCAxIG0gLTQ4Ljk5OTk5OTgsMSBoIDEgbSAzLDAgaCAxLjk5OTk5OTggbSAzLDAgaCAzIG0gMywwIGggMiBtIDMsMCBoIDIgbSAyLDAgaCA0IG0gMiwwIGggNCBtIDMsMCBoIDEgbSAyLDAgaCAxIG0gMSwwIGggMyBtIDMsMCBoIDEgbSAtNDguOTk5OTk5OCwxIGggMiBtIDEsMCBoIDQuOTk5OTk5OCBtIDIsMCBoIDMgbSAzLDAgaCAyIG0gNSwwIGggMSBtIDEsMCBoIDEgbSAxLDAgaCAyIG0gNCwwIGggMyBtIDEsMCBoIDEgbSAyLDAgaCA0IG0gMywwIGggMiBtIC00OC45OTk5OTk4LDEgaCAxIG0gMSwwIGggMSBtIDEsMCBoIDEuOTk5OTk5OCBtIDEsMCBoIDIgbSAxLDAgaCAyIG0gMiwwIGggMiBtIDEsMCBoIDEgbSAxLDAgaCA2IG0gMywwIGggNCBtIDEsMCBoIDIgbSAzLDAgaCAyIG0gMSwwIGggMyBtIDEsMCBoIDMgbSAtNDcuOTk5OTk5OCwxIGggMSBtIDEsMCBoIDEgbSAyLjk5OTk5OTgsMCBoIDQgbSAxLDAgaCAyIG0gNSwwIGggNyBtIDEsMCBoIDIgbSAxLDAgaCAxIG0gMSwwIGggMiBtIDIsMCBoIDIgbSAxLDAgaCAxIG0gMywwIGggMSBtIDMsMCBoIDEgbSAtNDUuOTk5OTk5OCwxIGggNC45OTk5OTk4IG0gMSwwIGggMiBtIDEsMCBoIDMgbSAxLDAgaCAzIG0gMiwwIGggMSBtIDUsMCBoIDIgbSAxLDAgaCAxIG0gMSwwIGggMSBtIDEsMCBoIDIgbSAzLDAgaCAxIG0gNCwwIGggMyBtIDEsMCBoIDEgbSAtNDIuOTk5OTk5OCwxIGggNC45OTk5OTk4IG0gMSwwIGggMyBtIDIsMCBoIDEgbSAxLDAgaCAyIG0gMiwwIGggNyBtIDMsMCBoIDggbSAxLDAgaCA1IG0gMywwIGggMSBtIC00Ni45OTk5OTk4LDEgaCAxIG0gMSwwIGggMSBtIDIuOTk5OTk5OCwwIGggMyBtIDEsMCBoIDEgbSAxLDAgaCA1IG0gMywwIGggMSBtIDMsMCBoIDEgbSAxLDAgaCA0IG0gMiwwIGggMSBtIDEsMCBoIDUgbSAzLDAgaCAxIG0gMywwIGggMSBtIC00Ni45OTk5OTk4LDEgaCAzIG0gMC45OTk5OTk4LDAgaCAxIG0gMSwwIGggMSBtIDEsMCBoIDEgbSAxLDAgaCAyIG0gMSwwIGggMyBtIDEsMCBoIDIgbSAxLDAgaCAxIG0gMSwwIGggMSBtIDEsMCBoIDEgbSAzLDAgaCAyIG0gNSwwIGggMSBtIDIsMCBoIDEgbSAxLDAgaCAxIG0gMSwwIGggMSBtIC00MS45OTk5OTk4LDEgaCAyIG0gMi45OTk5OTk4LDAgaCA0IG0gMiwwIGggMSBtIDIsMCBoIDEgbSAyLDAgaCAxIG0gMSwwIGggMSBtIDMsMCBoIDIgbSAxLDAgaCAxIG0gMiwwIGggMSBtIDMsMCBoIDEgbSAyLDAgaCAyIG0gMywwIGggMSBtIDEsMCBoIDIgbSAtNDUuOTk5OTk5OCwxIGggNi45OTk5OTk4IG0gMSwwIGggMyBtIDEsMCBoIDEgbSAyLDAgaCAxIG0gMiwwIGggMSBtIDEsMCBoIDUgbSAxLDAgaCAyIG0gMiwwIGggMTMgbSAyLDAgaCAyIG0gLTQ4Ljk5OTk5OTgsMSBoIDEgbSAxLDAgaCAzIG0gNS45OTk5OTk4LDAgaCAyIG0gMSwwIGggMiBtIDIsMCBoIDMgbSAxLDAgaCAxIG0gMiwwIGggMSBtIDMsMCBoIDEgbSAxLDAgaCAxIG0gMSwwIGggMSBtIDEsMCBoIDIgbSAxLDAgaCA0IG0gMSwwIGggMSBtIDMsMCBoIDIgbSAtNDguOTk5OTk5OCwxIGggMSBtIDEsMCBoIDIgbSAxLjk5OTk5OTgsMCBoIDMgbSAzLDAgaCAyIG0gMSwwIGggMSBtIDIsMCBoIDMgbSAxLDAgaCA1IG0gNCwwIGggMiBtIDEsMCBoIDEgbSAxLDAgaCAyIG0gMSwwIGggMiBtIDMsMCBoIDIgbSAtNDQuOTk5OTk5OCwxIGggMSBtIDEsMCBoIDIgbSAyLjk5OTk5OTgsMCBoIDIgbSA0LDAgaCAxIG0gMSwwIGggMSBtIDQsMCBoIDIgbSAxLDAgaCAyIG0gNCwwIGggMyBtIDIsMCBoIDEgbSAxLDAgaCAxIG0gMSwwIGggMSBtIDEsMCBoIDEgbSAxLDAgaCAyIG0gMSwwIGggMSBtIDEsMCBoIDEgbSAtNDguOTk5OTk5OCwxIGggMiBtIDMsMCBoIDEuOTk5OTk5OCBtIDIsMCBoIDEgbSAyLDAgaCAxIG0gNSwwIGggMSBtIDEsMCBoIDMgbSAyLDAgaCA0IG0gMywwIGggMSBtIDEsMCBoIDMgbSAzLDAgaCAxIG0gMiwwIGggNSBtIC00Ny45OTk5OTk4LDEgaCAxIG0gMiwwIGggMSBtIDMuOTk5OTk5OCwwIGggMyBtIDIsMCBoIDEgbSAxLDAgaCAxIG0gMSwwIGggMSBtIDEsMCBoIDIgbSAxLDAgaCAyIG0gMSwwIGggMSBtIDEsMCBoIDIgbSAxLDAgaCA1IG0gMSwwIGggMSBtIDEsMCBoIDIgbSA0LDAgaCAzIG0gLTQ1Ljk5OTk5OTgsMSBoIDIgbSAxLDAgaCAzLjk5OTk5OTggbSAxLDAgaCAxIG0gMSwwIGggMiBtIDEsMCBoIDMgbSAyLDAgaCA2IG0gMiwwIGggMiBtIDMsMCBoIDEgbSAyLDAgaCA2IG0gMywwIGggMiBtIDEsMCBoIDIgbSAtNDguOTk5OTk5OCwxIGggMSBtIDEsMCBoIDMgbSAxLjk5OTk5OTgsMCBoIDMgbSAyLDAgaCAxIG0gMywwIGggMSBtIDEsMCBoIDEgbSAxLDAgaCAyIG0gMSwwIGggMyBtIDIsMCBoIDIgbSAxLDAgaCAxIG0gNCwwIGggMiBtIDIsMCBoIDEgbSAyLDAgaCAzIG0gMSwwIGggMiBtIC00OC45OTk5OTk4LDEgaCAxIG0gMiwwIGggMSBtIDEuOTk5OTk5OCwwIGggMiBtIDEsMCBoIDEgbSAxLDAgaCAxIG0gNCwwIGggMSBtIDEsMCBoIDEgbSAyLDAgaCAxIG0gNywwIGggMSBtIDIsMCBoIDEgbSA1LDAgaCAxIG0gMywwIGggMiBtIDEsMCBoIDIgbSAtNDUuOTk5OTk5OCwxIGggMyBtIDEsMCBoIDAuOTk5OTk5OCBtIDIsMCBoIDIgbSA0LDAgaCA3IG0gMSwwIGggMSBtIDEsMCBoIDEgbSAzLDAgaCAxIG0gMSwwIGggMiBtIDEsMCBoIDIgbSAyLDAgaCAyIG0gMSwwIGggMSBtIDEsMCBoIDEgbSAxLDAgaCA0IG0gLTQyLDEgaCAxIG0gNSwwIGggMSBtIDMsMCBoIDEgbSAyLDAgaCAxIG0gMSwwIGggMiBtIDEsMCBoIDUgbSAxLDAgaCAxIG0gOSwwIGggMSBtIDEsMCBoIDEgbSAtNDIuOTk5OTk5OCwxIGggMiBtIDEsMCBoIDEgbSAxLDAgaCAwLjk5OTk5OTggbSAyLDAgaCAzIG0gMiwwIGggMiBtIDEsMCBoIDIgbSA3LDAgaCAyIG0gNCwwIGggMiBtIDMsMCBoIDEgbSAxLDAgaCAxIG0gMiwwIGggMSBtIDEsMCBoIDEgbSAzLDAgaCAyIG0gLTQ3Ljk5OTk5OTgsMSBoIDEgbSAzLDAgaCAyLjk5OTk5OTggbSAxLDAgaCAxIG0gMSwwIGggMSBtIDQsMCBoIDEgbSA0LDAgaCAzIG0gMiwwIGggMSBtIDQsMCBoIDMgbSAxLDAgaCAyIG0gMSwwIGggMSBtIDIsMCBoIDEgbSA0LDAgaCAyIG0gLTQ2Ljk5OTk5OTgsMSBoIDMgbSAyLjk5OTk5OTgsMCBoIDQgbSAxLDAgaCAxIG0gMSwwIGggMyBtIDEsMCBoIDIgbSAxLDAgaCAyIG0gMSwwIGggMiBtIDEsMCBoIDEgbSAyLDAgaCA3IG0gMSwwIGggMiBtIDQsMCBoIDIgbSAyLDAgaCAxIG0gLTQ4Ljk5OTk5OTgsMSBoIDMgbSAyLjk5OTk5OTgsMCBoIDEgbSAxLDAgaCAzIG0gMiwwIGggMSBtIDIsMCBoIDEgbSAxLDAgaCAxIG0gMSwwIGggMSBtIDEsMCBoIDYgbSAxLDAgaCAyIG0gMSwwIGggMiBtIDEsMCBoIDIgbSAxLDAgaCAxIG0gMSwwIGggNSBtIDIsMCBoIDIgbSAtNDEsMSBoIDEgbSAyLDAgaCAxIG0gMywwIGggMSBtIDEsMCBoIDIgbSAxLDAgaCAxIG0gMSwwIGggMSBtIDMsMCBoIDEgbSAxLDAgaCAxIG0gMSwwIGggNCBtIDIsMCBoIDMgbSAxLDAgaCAxIG0gMywwIGggMiBtIDEsMCBoIDEgbSAtNDcuOTk5OTk5OCwxIGggNi45OTk5OTk4IG0gMSwwIGggMSBtIDEsMCBoIDMgbSAxLDAgaCAxIG0gMiwwIGggMiBtIDEsMCBoIDEgbSAxLDAgaCAxIG0gMSwwIGggMSBtIDEsMCBoIDEgbSAyLDAgaCAxIG0gMSwwIGggMyBtIDMsMCBoIDQgbSAxLDAgaCAxIG0gMSwwIGggMiBtIDIsMCBoIDEgbSAtNDguOTk5OTk5OCwxIGggMSBtIDQuOTk5OTk5OCwwIGggMSBtIDIsMCBoIDIgbSAzLDAgaCAxIG0gNiwwIGggMiBtIDMsMCBoIDEgbSAxLDAgaCA2IG0gMiwwIGggMSBtIDIsMCBoIDIgbSAzLDAgaCAyIG0gLTQ1Ljk5OTk5OTgsMSBoIDEgbSAxLDAgaCAzIG0gMC45OTk5OTk4LDAgaCAxIG0gMSwwIGggMSBtIDEsMCBoIDEgbSA0LDAgaCAzIG0gMiwwIGggMSBtIDEsMCBoIDUgbSAzLDAgaCAzIG0gMywwIGggMSBtIDEsMCBoIDEgbSAxLDAgaCA1IG0gMywwIGggMSBtIC00OC45OTk5OTk4LDEgaCAxIG0gMSwwIGggMyBtIDAuOTk5OTk5OCwwIGggMSBtIDMsMCBoIDEgbSAxLDAgaCA5IG0gMywwIGggMSBtIDIsMCBoIDQgbSAxLDAgaCAyIG0gMSwwIGggMSBtIDEsMCBoIDMgbSAxLDAgaCAxIG0gMywwIGggMSBtIDIsMCBoIDEgbSAtNDguOTk5OTk5OCwxIGggMSBtIDEsMCBoIDMgbSAwLjk5OTk5OTgsMCBoIDEgbSAyLDAgaCA2IG0gNCwwIGggMSBtIDQsMCBoIDEgbSAxLDAgaCAyIG0gNiwwIGggMSBtIDEsMCBoIDEgbSAzLDAgaCAzIG0gMiwwIGggMyBtIC00Ny45OTk5OTk4LDEgaCAxIG0gNC45OTk5OTk4LDAgaCAxIG0gMiwwIGggMyBtIDEsMCBoIDUgbSAzLDAgaCAzIG0gMSwwIGggMiBtIDEsMCBoIDIgbSAyLDAgaCAzIG0gMSwwIGggMSBtIDIsMCBoIDIgbSAxLDAgaCAxIG0gMSwwIGggMSBtIC00NC45OTk5OTk4LDEgaCA2Ljk5OTk5OTggbSAxLDAgaCAyIG0gMywwIGggNCBtIDEsMCBoIDMgbSAzLDAgaCAzIG0gMiwwIGggMiBtIDIsMCBoIDIgbSAyLDAgaCAxIG0gMiwwIGggMSBtIDEsMCBoIDIgbSAxLDAgaCAxIG0gMiwwIGggMSIgaWQ9InBhdGgyIj48L3BhdGg+PGcgdHJhbnNmb3JtPSJtYXRyaXgoMC41OTY3Mzg5OSwwLDAsMC41OTY3Mzg5OSwtNDEuNjM4ODUsLTQ1LjkzMjE0MykiIGlkPSJnOSI+PHBhdGggZD0ibSA0Ny4wNDYxOCwxMjEuMjQzMjUgMTEuODQ2NTc3LDFlLTUgMS40ZS01LDcuMTA3NDcgSCA1My45MjI4OCBsIDQuOTY5OTAxLDQuNTQ4NTkgLTQuMjIxOTQ2LC0xMGUtNiAtNC44NzM5NjYsLTQuNTQ4NTggOWUtNiw0LjU0ODU4IGggLTIuNzUwNjc0IGwgLTEuNWUtNSwtNy4yMjU0IGggOC42ODU4NDkgbCAtNGUtNiwtMS43Mjk1NCAtOC42ODU4NDgsLTFlLTUgeiIgc3R5bGU9ImZpbGw6IzAwMDAwMDtmaWxsLW9wYWNpdHk6MTtmaWxsLXJ1bGU6bm9uemVybztzdHJva2U6bm9uZSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNDQuNDg5MTc5LC0zNC43MjU2NzYpIiBpZD0icGF0aDEtMyI+PC9wYXRoPjxwYXRoIGQ9Im0gNjAuMTIyOTQzLDEzMi44OTkzMiBoIDIuODk1MjU1IGwgLTIuNGUtNSwtMTEuNjc5NjggSCA2MC4xMjI5MiBaIiBzdHlsZT0iZmlsbDojMDAwMDAwO2ZpbGwtb3BhY2l0eToxO2ZpbGwtcnVsZTpub256ZXJvO3N0cm9rZTpub25lIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg0NC40ODkxNzksLTM0LjcyNTY3NikiIGlkPSJwYXRoMi02Ij48L3BhdGg+PHBhdGggZD0ibSAzNi45MzczLDEzMC4wODAxIC0xLjhlLTUsLTguODM2ODUgaCAtMi4yNjc5NDggYyAtMC40MTAxMzksMCAtMC43MjM4MzQsMC4zMDgyMiAtMC43MjM4MzMsMC42ODY3OSA0ZS02LDIuMDg1NTEgLTAuMDI0MDksOC4yMjExNyAtMC4wMjQwOSwxMC4yNTg1MiAwLDAuMzc5MDggMC4zMTM2OTcsMC43MTA3NSAwLjY5OTcyNSwwLjcxMDc1IDEuNTY4MjI0LDAgNi4wNzk4MzksMCA2LjczMTAwMiwwIGwgLTZlLTYsLTIuODE5MiB6IiBzdHlsZT0iZmlsbDojMDAwMDAwO2ZpbGwtb3BhY2l0eToxO2ZpbGwtcnVsZTpub256ZXJvO3N0cm9rZTpub25lIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg0NC40ODkxNzksLTM0LjcyNTY3NikiIGlkPSJwYXRoMyI+PC9wYXRoPjxwYXRoIGQ9Im0gNDIuODQ4MDM1LDEzNS44MTMzMiBjIDAuMjY1NzI5LDAgMi4yOTIyMjksMCAyLjk2ODAxMiwwIDAsMCAtMS4yZS01LC01Ljc1NjkyIC0xLjJlLTUsLTUuODUxNjQgLTAuOTY1MjgzLDAgLTEuOTc4MTA4LDAgLTIuOTY4MDExLDAgM2UtNiwxLjk0MjYyIDdlLTYsMy44ODUyNCAxLjFlLTUsNS44NTE2NCB6IiBzdHlsZT0iZmlsbDojMDAwMDAwO2ZpbGwtb3BhY2l0eToxO2ZpbGwtcnVsZTpub256ZXJvO3N0cm9rZTpub25lIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg0NC40ODkxNzksLTM0LjcyNTY3NikiIGlkPSJwYXRoNCI+PC9wYXRoPjxwYXRoIGQ9Im0gMzguMzg0ODY3LDEyMS4yNDMyNSBjIDAsMC4wNDc3IDZlLTYsMi45MTM4NSA2ZS02LDIuOTEzODUgMS4zMjcwMzEsMCAzLjAxNTYzOSwwIDQuNDYzMTM5LDAgNGUtNiwyLjAxNDMxIDllLTYsNC4zNTk0NiA5ZS02LDQuMzU5NDYgMC42NzU3ODMsMCAyLjcwMjI4MiwwIDIuOTY4MDExLDAgbCAtMS4zZS01LC02LjU2MjIyIGMgLTEwZS03LC0wLjM3OTQyIC0wLjMxNDEyMiwtMC42ODc2MyAtMC42OTk1NTYsLTAuNzExMDkgLTEuNDQ3NSwwIC00Ljg3Mzk1NywwIC02LjczMTU5NiwwIHoiIHN0eWxlPSJmaWxsOiMwMDAwMDA7ZmlsbC1vcGFjaXR5OjE7ZmlsbC1ydWxlOm5vbnplcm87c3Ryb2tlOm5vbmUiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDQ0LjQ4OTE3OSwtMzQuNzI1Njc2KSIgaWQ9InBhdGg1Ij48L3BhdGg+PHBhdGggZD0ibSAzOC4zODQ4NzYsMTI1LjU3ODQzIGMgMmUtNiwwLjk3MTU2IDRlLTYsMS45NDMxMiA2ZS02LDIuOTYxNTggMC4yNDEyNzgsMCAwLjUwNjY2NywwIDAuNzQ3OTQ2LDAgMC42NzU4NjcsMCAxLjUxOTc0NywwIDIuMTk1NTMsMCAwLDAgLTZlLTYsLTIuOTEzODQgLTZlLTYsLTIuOTYxNTggLTAuOTY1MjgzLDAgLTEuOTU0MjUyLDAgLTIuOTQzNDc2LDAgeiBtIDIuMDc0OTgsMi4wNjEyMSB2IDAgYyAtMC4yODk1LDAgLTAuNjI3MzkxLDAgLTAuODkzMTIsMCAtMC4wOTYxLDAgLTAuMTkyNjMyLDAgLTAuMzEzMjcxLDAgLTEwZS03LC0wLjQwMjg2IC0yZS02LC0wLjc4MTQzIC0zZS02LC0xLjE4NDMgMC40MTAwNTUsMCAwLjc5NjMzOCwwIDEuMjA2MzkyLDAgMCwwLjAyMzUgMmUtNiwxLjE4NDMgMmUtNiwxLjE4NDMgeiIgc3R5bGU9ImZpbGw6IzAwMDAwMDtmaWxsLW9wYWNpdHk6MTtmaWxsLXJ1bGU6bm9uemVybztzdHJva2U6bm9uZSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNDQuNDg5MTc5LC0zNC43MjU2NzYpIiBpZD0icGF0aDYiPjwvcGF0aD48cGF0aCBkPSJtIDc3LjIyODkwNSwxMjkuOTYxNjkgOWUtNiw0LjM1OTEzIGMgMTBlLTcsMC4zNzg5OSAtMC4zMzc4OSwwLjY4NzA0IC0wLjcyMzMyNCwwLjY4NzA0IGggLTQuNDM5MjgzIGwgMmUtNiwwLjcxMDY2IGggNS4xNjI2MDggMC4wMjQ2MiBjIDAuMzYxNjYzLDEwZS02IDAuNjc0OTM0LC0wLjMwNzk2IDAuNjc0OTMzLC0wLjY4NzA0IHYgLTAuMDIzNiBsIC0xZS01LC01LjA0NjE3IHoiIHN0eWxlPSJmaWxsOiMwMDAwMDA7ZmlsbC1vcGFjaXR5OjE7ZmlsbC1ydWxlOm5vbnplcm87c3Ryb2tlOm5vbmUiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDQ0LjQ4OTE3OSwtMzQuNzI1Njc2KSIgaWQ9InBhdGg3Ij48L3BhdGg+PHBhdGggZD0ibSAzMi43MTUwODgsMTI0LjEzMzY0IC05ZS02LC00LjM1OTQ2IGMgLTFlLTYsLTAuMzc4NTcgMC4yODk0OTksLTAuNjYzMzQgMC42NzU1MjcsLTAuNjYzMzQgaCA0LjQzOTM2OCBjIDAuMDI0MTEsMCAwLjAyNDExLC0wLjAyMzQgMC4wMjQxMSwtMC4wMjM0IGwgLTJlLTYsLTAuNjYzMzQgYyAwLDAgMCwtMC4wMjM0IC0wLjAyNDExLC0wLjAyMzQgbCAtNS4xMTQ4OTYsLTFlLTUgYyAtMC40MTAxMzksMCAtMC43MjM4MzQsMC4zMDgyMiAtMC43MjM4MzMsMC43MTAyNSBsIDEwZS02LDUuMDIyOCBjIDAsMC4wMjM1IDAuMDI0MTEsMC4wMjM1IDAuMDI0MTEsMC4wMjM1IGggMC42NzU2MTMgYyAwLDAgMC4wMjQxMSwwIDAuMDI0MTEsLTAuMDIzNSB6IiBzdHlsZT0iZmlsbDojMDAwMDAwO2ZpbGwtb3BhY2l0eToxO2ZpbGwtcnVsZTpub256ZXJvO3N0cm9rZTpub25lIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSg0NC40ODkxNzksLTM0LjcyNTY3NikiIGlkPSJwYXRoOCI+PC9wYXRoPjxwYXRoIGQ9Im0gNzUuOTc0MTExLDEyNC4xMzM2NiAtNmUtNiwtMi44OTA0IEggNjQuMjcyNzAzIGwgOGUtNiw0LjMzNTE3IDZlLTYsMi45MTQ2OSBoIDcuNzkzNTc3IGwgM2UtNiwxLjQ0NDg2IEggNjQuMjcyNzIgbCA2ZS02LDIuOTEzOTMgMTEuNzAxNDAyLDFlLTUgLTEuNGUtNSwtNy4yNDkxOSAtNy43OTI3MjgsLTEwZS02IC0zZS02LC0xLjQ2OTA2IHoiIHN0eWxlPSJmaWxsOiMwMDAwMDA7ZmlsbC1vcGFjaXR5OjE7ZmlsbC1ydWxlOm5vbnplcm87c3Ryb2tlOm5vbmUiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDQ0LjQ4OTE3OSwtMzQuNzI1Njc2KSIgaWQ9InBhdGg5Ij48L3BhdGg+PC9nPjxnIGlkPSJ0ZXh0MSIgc3R5bGU9ImZvbnQtd2VpZ2h0OjcwMDtmb250LXNpemU6MTZweDtmb250LWZhbWlseTpIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIiB0cmFuc2Zvcm09Im1hdHJpeCgwLjE5NzgxNTMxLDAsMCwwLjE5NzgxNTMxLDMyLjkzMDQ1NCw1Ljc1NzM3MzUpIiBhcmlhLWxhYmVsPSJXSVJBSEFTVEEgCkhBU0lMIEJVTUkiPjxwYXRoIGQ9Ik0gMTIuMDkxMTMsMTUgMTUuNDM2ODk1LDMuMzM2MDAwMiBIIDEyLjgwMzM0OCBMIDEwLjk5Nzk2LDEyLjA4OCA5LjA0MzUwMywzLjMzNjAwMDIgSCA2LjU5MjE1MDYgTCA0LjcyMDUwOTgsMTIuMDcyIDIuODQ4ODY5MSwzLjMzNjAwMDIgSCAwLjIxNTMyMTUgTCAzLjYyNzMzOTEsMTUgaCAyLjIzNjAzMSBMIDcuODM0MzksNS44OTYwMDAxIDkuODU1MDk5NSwxNSBaIE0gMTkuMTYzNTg2LDMuMzM2MDAwMiBIIDE2LjY3OTEwNyBWIDE1IGggMi40ODQ0NzkgeiBNIDI0LjA0OTcyNywxMC4zNzYgaCAyLjg0ODg2OSBjIDEuMDc2NjA3LDAgMS41NDAzNzcsMC40MTYgMS41NDAzNzcsMS4zNzYgdiAwLjQ4IGMgLTAuMDE2NTYsMC4zMDQgLTAuMDE2NTYsMC41OTIgLTAuMDE2NTYsMC43NjggMCwxLjEwNCAwLjA2NjI1LDEuNDQgMC4zNjQzOTEsMiBoIDIuNjY2Njc0IHYgLTAuNDMyIGMgLTAuMzgwOTU0LC0wLjIwOCAtMC41MzAwMjMsLTAuNDQ4IC0wLjUzMDAyMywtMC45NiAtMC4wNjYyNSwtMy40NCAtMC4xMzI1MDUsLTMuNiAtMS42NzI4ODIsLTQuMjM5OTk5OSAxLjM1ODE4MiwtMC41MTIgMi4wMzcyNzMsLTEuNDU2IDIuMDM3MjczLC0yLjg4IDAsLTAuOTI3OTk5OSAtMC4zMzEyNjQsLTEuNzc1OTk5OSAtMC45MTA5NzYsLTIuMzUxOTk5OSAtMC41NDY1ODUsLTAuNTQ0IC0xLjMwODQ5MiwtMC44IC0yLjMzNTQxLC0wLjggSCAyMS41NjUyNDggViAxNSBoIDIuNDg0NDc5IHogbSAwLC0xLjk5OTk5OTkgViA1LjMzNjAwMDIgaCAyLjk5NzkzNyBjIDAuNzEyMjE4LDAgMC45OTM3OTIsMC4wNjQgMS4zMDg0OTMsMC4zMDQgMC4yOTgxMzcsMC4yMzk5OTk5IDAuNDQ3MjA2LDAuNjM5OTk5OSAwLjQ0NzIwNiwxLjE4Mzk5OTkgMCwwLjU2IC0wLjE0OTA2OSwxLjAwOCAtMC40NDcyMDYsMS4yNDggLTAuMjgxNTc1LDAuMjI0IC0wLjU5NjI3NSwwLjMwNCAtMS4zMDg0OTMsMC4zMDQgeiBNIDQwLjUzMDA1NSwxMi42NDggNDEuMzI1MDg4LDE1IEggNDMuODc1ODIgTCAzOS43MDE4OTUsMy4zMzYwMDAyIGggLTIuNzQ5NDkgTCAzMi42NjI1MzgsMTUgaCAyLjUzNDE2OSBsIDAuODExNTk2LC0yLjM1MiB6IG0gLTAuNjc5MDkxLC0yIEggMzYuNzAzOTU3IEwgMzguMjc3NDYxLDYuMDg4MDAwMSBaIE0gNTIuNTg4MDI5LDkuNzA0MDAwMSBWIDE1IGggMi40ODQ0NzkgViAzLjMzNjAwMDIgSCA1Mi41NzE0NjYgViA3LjcwNDAwMDEgSCA0Ny44MDEyNjcgViAzLjMzNjAwMDIgSCA0NS4zMTY3ODggViAxNSBoIDIuNDg0NDc5IFYgOS43MDQwMDAxIFogTSA2NC4zMTQ3MTUsMTIuNjQ4IDY1LjEwOTc0OCwxNSBIIDY3LjY2MDQ4IEwgNjMuNDg2NTU2LDMuMzM2MDAwMiBoIC0yLjc0OTQ5IEwgNTYuNDQ3MTk5LDE1IGggMi41MzQxNjggbCAwLjgxMTU5NywtMi4zNTIgeiBtIC0wLjY3OTA5MSwtMiBoIC0zLjE0NzAwNiBsIDEuNTczNTAzLC00LjU1OTk5OTkgeiBtIDE0LjA5NTIyLC0zLjc1OTk5OTkgYyAtMC4wMTY1NiwtMi40MTU5OTk5IC0xLjY4OTQ0NSwtMy43NDM5OTk5IC00LjczNzA3MywtMy43NDM5OTk5IC0yLjg5ODU1OCwwIC00LjU3MTQ0MSwxLjMxMiAtNC41NzE0NDEsMy41ODM5OTk5IDAsMS44MDggMC45NDQxMDIsMi42ODggMy4zOTU0NTUsMy4xMzYgTCA3My41MDcyMywxMC4xODQgYyAxLjY1NjMyLDAuMzA0IDIuMjY5MTU4LDAuNzUyIDIuMjY5MTU4LDEuNjk2IDAsMC45NzYgLTAuOTI3NTM5LDEuNTY4IC0yLjQzNDc5LDEuNTY4IC0xLjY4OTQ0NSwwIC0yLjYzMzU0NywtMC42ODggLTIuNzE2MzYzLC0xLjkzNiBoIC0yLjQxODIyNiBjIDAuMTQ5MDY5LDIuNDk2IDEuOTIxMzMsMy44NTYgNS4wMDIwODQsMy44NTYgMy4xMTM4OCwwIDQuOTUyMzk0LC0xLjM5MiA0Ljk1MjM5NCwtMy43NzYgMCwtMS44Mzk5OTk5IC0wLjk2MDY2NSwtMi43OTk5OTk5IC0zLjE5NjY5NiwtMy4yMTU5OTk5IGwgLTEuODg4MjA0LC0wLjM1MiBjIC0xLjc3MjI2MSwtMC4zMzYgLTIuMjg1NzIsLTAuNjcyIC0yLjI4NTcyLC0xLjUyIDAsLTAuODc5OTk5OSAwLjc5NTAzMywtMS40Mzk5OTk5IDIuMDg2OTYyLC0xLjQzOTk5OTkgMS41NzM1MDMsMCAyLjQ1MTM1MywwLjY0IDIuNTM0MTY5LDEuODIzOTk5OSB6IG0gNy4yMzgwOTUsLTEuNTUxOTk5OSBoIDMuNTI3OTYgdiAtMiBoIC05LjY3MjkwNSB2IDIgSCA4Mi40ODQ0NiBWIDE1IGggMi40ODQ0NzkgeiBNIDk1LjU1Mjc2OCwxMi42NDggOTYuMzQ3ODAxLDE1IGggMi41NTA3MzEgTCA5NC43MjQ2MDgsMy4zMzYwMDAyIGggLTIuNzQ5NDkgTCA4Ny42ODUyNTEsMTUgaCAyLjUzNDE2OSBsIDAuODExNTk2LC0yLjM1MiB6IG0gLTAuNjc5MDkxLC0yIEggOTEuNzI2NjcgbCAxLjU3MzUwMywtNC41NTk5OTk5IHoiIGlkPSJwYXRoMTAiPjwvcGF0aD48cGF0aCBkPSJtIDguMzk3NTM4NSwzMC40MDc5OTEgdiA1LjI5NiBoIDIuNDg0NDc4NSB2IC0xMS42NjQgSCA4LjM4MDk3NTMgdiA0LjM2OCBIIDMuNjEwNzc1OSB2IC00LjM2OCBIIDEuMTI2Mjk3MSB2IDExLjY2NCBoIDIuNDg0NDc4OCB2IC01LjI5NiB6IG0gMTEuNzI2Njg4NSwyLjk0NCAwLjc5NTAzNCwyLjM1MiBoIDIuNTUwNzMxIGwgLTQuMTczOTI0LC0xMS42NjQgaCAtMi43NDk0OSBsIC00LjI4OTg2NywxMS42NjQgaCAyLjUzNDE2OCBsIDAuODExNTk3LC0yLjM1MiB6IG0gLTAuNjc5MDkxLC0yIEggMTYuMjk4MTMgbCAxLjU3MzUwMywtNC41NiB6IG0gMTQuMDk1MjIyLC0zLjc2IGMgLTAuMDE2NTYsLTIuNDE2IC0xLjY4OTQ0NiwtMy43NDQgLTQuNzM3MDczLC0zLjc0NCAtMi44OTg1NTksMCAtNC41NzE0NDIsMS4zMTIgLTQuNTcxNDQyLDMuNTg0IDAsMS44MDggMC45NDQxMDIsMi42ODggMy4zOTU0NTUsMy4xMzYgbCAxLjY4OTQ0NSwwLjMyIGMgMS42NTYzMiwwLjMwNCAyLjI2OTE1OCwwLjc1MiAyLjI2OTE1OCwxLjY5NiAwLDAuOTc2IC0wLjkyNzUzOSwxLjU2OCAtMi40MzQ3ODksMS41NjggLTEuNjg5NDQ2LDAgLTIuNjMzNTQ4LC0wLjY4OCAtMi43MTYzNjQsLTEuOTM2IGggLTIuNDE4MjI2IGMgMC4xNDkwNjksMi40OTYgMS45MjEzMywzLjg1NiA1LjAwMjA4NCwzLjg1NiAzLjExMzg4LDAgNC45NTIzOTUsLTEuMzkyIDQuOTUyMzk1LC0zLjc3NiAwLC0xLjg0IC0wLjk2MDY2NiwtMi44IC0zLjE5NjY5NywtMy4yMTYgbCAtMS44ODgyMDQsLTAuMzUyIGMgLTEuNzcyMjYxLC0wLjMzNiAtMi4yODU3MiwtMC42NzIgLTIuMjg1NzIsLTEuNTIgMCwtMC44OCAwLjc5NTAzMywtMS40NCAyLjA4Njk2MiwtMS40NCAxLjU3MzUwMywwIDIuNDUxMzUzLDAuNjQgMi41MzQxNjksMS44MjQgeiBtIDQuNTIxNzQ3LC0zLjU1MiBoIC0yLjQ4NDQ3OSB2IDExLjY2NCBoIDIuNDg0NDc5IHogbSA0Ljg4NjEzOSwwIGggLTIuNDg0NDc5IHYgMTEuNjY0IGggOC4yNjUwMzMgdiAtMiBoIC01Ljc4MDU1NCB6IG0gMTIuMjczMjk1LDExLjY2NCBoIDUuNDMyNzI3IGMgMS4zOTEzMDksMCAyLjMxODg0NywtMC4yNTYgMy4wNDc2MjgsLTAuODQ4IDAuNzI4NzgsLTAuNTkyIDEuMTkyNTUsLTEuNTY4IDEuMTkyNTUsLTIuNTEyIDAsLTEuMTUyIC0wLjYyOTQwMiwtMi4wNjQgLTIuMDA0MTQ3LC0yLjgzMiAxLjE5MjU1LC0wLjczNiAxLjY1NjMyLC0xLjQwOCAxLjY1NjMyLC0yLjQgMCwtMC44MTYgLTAuNDE0MDgsLTEuNjQ4IC0xLjA5MzE3MSwtMi4yMjQgLTAuNzEyMjE3LC0wLjU5MiAtMS41NTY5NCwtMC44NDggLTIuODQ4ODY5LC0wLjg0OCBoIC01LjM4MzAzOCB6IG0gMi40ODQ0NzksLTkuNjY0IGggMi42OTk4MDEgYyAxLjE1OTQyMywwIDEuNzU1Njk4LDAuNDQ4IDEuNzU1Njk4LDEuMzEyIDAsMC44OCAtMC41OTYyNzUsMS4zMjggLTEuNzU1Njk4LDEuMzI4IGggLTIuNjk5ODAxIHogbSAwLDQuNjQgaCAyLjk2NDgxMiBjIDEuMjA5MTEzLDAgMS44Mzg1MTQsMC41MTIgMS44Mzg1MTQsMS41MiAwLDAuOTkyIC0wLjYyOTQwMSwxLjUwNCAtMS44Mzg1MTQsMS41MDQgaCAtMi45NjQ4MTIgeiBtIDE2LjQ2Mzc4NCwtNi42NCB2IDcuOTA0IGMgMCwxLjQwOCAtMC43NDUzNDQsMi4wOCAtMi4zMDIyODQsMi4wOCAtMS41NTY5NCwwIC0yLjMwMjI4NCwtMC42NzIgLTIuMzAyMjg0LC0yLjA4IHYgLTcuOTA0IGggLTIuNDg0NDc5IHYgNy45MDQgYyAwLDEuMzEyIDAuMzY0MzkxLDIuMjQgMS4xNzU5ODcsMi45NDQgMC44Nzc4NDksMC43NjggMi4xNTMyMTUsMS4xODQgMy42MTA3NzYsMS4xODQgMS40NTc1NjEsMCAyLjczMjkyNywtMC40MTYgMy42MTA3NzYsLTEuMTg0IDAuODExNTk2LC0wLjcwNCAxLjE3NTk4NywtMS42MzIgMS4xNzU5ODcsLTIuOTQ0IHYgLTcuOTA0IHogbSA3LjE4ODM5NiwyLjU3NiAyLjE2OTc3OCw5LjA4OCBoIDIuNDg0NDc5IGwgMi4xMzY2NTIsLTkuMDg4IHYgOS4wODggaCAyLjQ4NDQ3OCB2IC0xMS42NjQgaCAtMy43NDMyODEgbCAtMi4xMjAwODksOS4yOCAtMi4xODYzNDEsLTkuMjggaCAtMy43MTAxNTUgdiAxMS42NjQgaCAyLjQ4NDQ3OSB6IG0gMTMuNzQ3NDIyLC0yLjU3NiBoIC0yLjQ4NDQ3OSB2IDExLjY2NCBoIDIuNDg0NDc5IHoiIGlkPSJwYXRoMTEiPjwvcGF0aD48L2c+PC9nPjwvc3ZnPgogICAgICAgICAgICAgICAgPC9kaXY+CiAgICAgICAgICAgIA=="><div class="no-select" style="pointer-events: none;">
+                
+                
+                
+
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    
+                    
+                    
+                
+                    <h1 placeholder="Judul Penutup...">Terima Kasih</h1>
+                    <div class="meta" placeholder="Meta info...">Setulusnya</div>
+                    <p>Tulisanku yang lain, silakan kunjungi <a href="https://hnf-nulis.github.io/ku" target="_blank" rel="noopener noreferrer">https://hnf-nulis.github.io/ku</a></p><p>Bila ingin bagikan tulisan ini, dipersilakan ketuk tombol berbagi di bawah. </p>
+                <div class="thanks-footer">
+                    <svg class="thanks-art" viewBox="4 4 54 65" role="img" aria-label="WIRAHASTA HASIL BUMI - QRIS" version="1.1" xmlns="http://www.w3.org/2000/svg"><defs id="defs2"></defs><g id="g11" transform="translate(2.4693796,1.9315048)"><path shape-rendering="crispEdges" stroke="#000000" d="m 4.0612412,16.63699 h 6.9999998 m 1,0 h 1 m 1,0 h 2 m 1,0 h 1 m 1,0 h 3 m 1,0 h 2 m 7,0 h 2 m 1,0 h 1 m 1,0 h 1 m 6,0 h 1 m 1,0 h 7 m -48.9999998,1 h 1 m 4.9999998,0 h 1 m 3,0 h 1 m 3,0 h 2 m 3,0 h 1 m 2,0 h 1 m 2,0 h 4 m 1,0 h 1 m 3,0 h 7 m 1,0 h 1 m 5,0 h 1 m -48.9999998,1 h 1 m 1,0 h 3 m 0.9999998,0 h 1 m 2,0 h 1 m 1,0 h 4 m 5,0 h 1 m 1,0 h 2 m 3,0 h 2 m 1,0 h 1 m 2,0 h 2 m 2,0 h 1 m 1,0 h 2 m 1,0 h 1 m 1,0 h 3 m 1,0 h 1 m -48.9999998,1 h 1 m 1,0 h 3 m 0.9999998,0 h 1 m 1,0 h 1 m 2,0 h 1 m 5,0 h 2 m 3,0 h 1 m 1,0 h 2 m 1,0 h 5 m 1,0 h 1 m 1,0 h 3 m 1,0 h 1 m 2,0 h 1 m 1,0 h 3 m 1,0 h 1 m -48.9999998,1 h 1 m 1,0 h 3 m 0.9999998,0 h 1 m 1,0 h 3 m 3,0 h 1 m 2,0 h 2 m 3,0 h 8 m 1,0 h 4 m 1,0 h 2 m 4,0 h 1 m 1,0 h 3 m 1,0 h 1 m -48.9999998,1 h 1 m 4.9999998,0 h 1 m 1,0 h 6 m 3,0 h 1 m 1,0 h 1 m 1,0 h 2 m 3,0 h 1 m 1,0 h 1 m 1,0 h 2 m 2,0 h 2 m 2,0 h 1 m 3,0 h 1 m 5,0 h 1 m -48.9999998,1 h 6.9999998 m 1,0 h 1 m 1,0 h 1 m 1,0 h 1 m 1,0 h 1 m 1,0 h 1 m 1,0 h 1 m 1,0 h 1 m 1,0 h 1 m 1,0 h 1 m 1,0 h 1 m 1,0 h 1 m 1,0 h 1 m 1,0 h 1 m 1,0 h 1 m 1,0 h 1 m 1,0 h 1 m 1,0 h 1 m 1,0 h 7 m -41,1 h 1 m 1,0 h 4 m 5,0 h 2 m 1,0 h 1 m 3,0 h 1 m 2,0 h 1 m 2,0 h 4 m 3,0 h 2 m -40.9999998,1 h 1 m 3,0 h 1 m 0.9999998,0 h 3 m 2,0 h 1 m 4,0 h 1 m 1,0 h 1 m 1,0 h 8 m 2,0 h 3 m 2,0 h 1 m 5,0 h 5 m 2,0 h 1 m -48.9999998,1 h 1 m 1,0 h 1 m 2,0 h 0.9999998 m 3,0 h 1 m 12,0 h 1 m 3,0 h 1 m 4,0 h 1 m 2,0 h 3 m 1,0 h 1 m 2,0 h 2 m 1,0 h 1 m 3,0 h 1 m -48.9999998,1 h 3 m 1,0 h 1 m 0.9999998,0 h 1 m 1,0 h 2 m 2,0 h 1 m 1,0 h 2 m 1,0 h 2 m 1,0 h 2 m 2,0 h 4 m 1,0 h 1 m 2,0 h 1 m 6,0 h 2 m 3,0 h 1 m 3,0 h 1 m -47.9999998,1 h 4 m 2.9999998,0 h 2 m 1,0 h 4 m 1,0 h 3 m 3,0 h 1 m 2,0 h 1 m 2,0 h 6 m 2,0 h 1 m 3,0 h 2 m 4,0 h 2 m -47.9999998,1 h 2 m 3,0 h 2.9999998 m 1,0 h 5 m 1,0 h 1 m 1,0 h 1 m 2,0 h 1 m 2,0 h 2 m 3,0 h 1 m 1,0 h 2 m 5,0 h 3 m 2,0 h 2 m -41.9999998,1 h 1 m 2,0 h 0.9999998 m 1,0 h 1 m 4,0 h 6 m 1,0 h 2 m 2,0 h 1 m 1,0 h 3 m 2,0 h 1 m 2,0 h 1 m 1,0 h 1 m 2,0 h 2 m 3,0 h 2 m 1,0 h 1 m 1,0 h 1 m -48.9999998,1 h 5 m 0.9999998,0 h 2 m 1,0 h 2 m 2,0 h 2 m 4,0 h 1 m 2,0 h 3 m 6,0 h 1 m 2,0 h 1 m 2,0 h 1 m 9,0 h 1 m -46.9999998,1 h 4 m 1.9999998,0 h 2 m 3,0 h 1 m 3,0 h 1 m 1,0 h 1 m 2,0 h 2 m 1,0 h 1 m 1,0 h 1 m 1,0 h 2 m 3,0 h 2 m 1,0 h 3 m 1,0 h 2 m 3,0 h 1 m 1,0 h 1 m -47.9999998,1 h 2 m 3.9999998,0 h 3 m 2,0 h 1 m 1,0 h 2 m 1,0 h 1 m 3,0 h 2 m 1,0 h 4 m 2,0 h 4 m 1,0 h 4 m 2,0 h 1 m 1,0 h 3 m 3,0 h 1 m -48.9999998,1 h 1 m 3,0 h 1.9999998 m 3,0 h 3 m 3,0 h 2 m 3,0 h 2 m 2,0 h 4 m 2,0 h 4 m 3,0 h 1 m 2,0 h 1 m 1,0 h 3 m 3,0 h 1 m -48.9999998,1 h 2 m 1,0 h 4.9999998 m 2,0 h 3 m 3,0 h 2 m 5,0 h 1 m 1,0 h 1 m 1,0 h 2 m 4,0 h 3 m 1,0 h 1 m 2,0 h 4 m 3,0 h 2 m -48.9999998,1 h 1 m 1,0 h 1 m 1,0 h 1.9999998 m 1,0 h 2 m 1,0 h 2 m 2,0 h 2 m 1,0 h 1 m 1,0 h 6 m 3,0 h 4 m 1,0 h 2 m 3,0 h 2 m 1,0 h 3 m 1,0 h 3 m -47.9999998,1 h 1 m 1,0 h 1 m 2.9999998,0 h 4 m 1,0 h 2 m 5,0 h 7 m 1,0 h 2 m 1,0 h 1 m 1,0 h 2 m 2,0 h 2 m 1,0 h 1 m 3,0 h 1 m 3,0 h 1 m -45.9999998,1 h 4.9999998 m 1,0 h 2 m 1,0 h 3 m 1,0 h 3 m 2,0 h 1 m 5,0 h 2 m 1,0 h 1 m 1,0 h 1 m 1,0 h 2 m 3,0 h 1 m 4,0 h 3 m 1,0 h 1 m -42.9999998,1 h 4.9999998 m 1,0 h 3 m 2,0 h 1 m 1,0 h 2 m 2,0 h 7 m 3,0 h 8 m 1,0 h 5 m 3,0 h 1 m -46.9999998,1 h 1 m 1,0 h 1 m 2.9999998,0 h 3 m 1,0 h 1 m 1,0 h 5 m 3,0 h 1 m 3,0 h 1 m 1,0 h 4 m 2,0 h 1 m 1,0 h 5 m 3,0 h 1 m 3,0 h 1 m -46.9999998,1 h 3 m 0.9999998,0 h 1 m 1,0 h 1 m 1,0 h 1 m 1,0 h 2 m 1,0 h 3 m 1,0 h 2 m 1,0 h 1 m 1,0 h 1 m 1,0 h 1 m 3,0 h 2 m 5,0 h 1 m 2,0 h 1 m 1,0 h 1 m 1,0 h 1 m -41.9999998,1 h 2 m 2.9999998,0 h 4 m 2,0 h 1 m 2,0 h 1 m 2,0 h 1 m 1,0 h 1 m 3,0 h 2 m 1,0 h 1 m 2,0 h 1 m 3,0 h 1 m 2,0 h 2 m 3,0 h 1 m 1,0 h 2 m -45.9999998,1 h 6.9999998 m 1,0 h 3 m 1,0 h 1 m 2,0 h 1 m 2,0 h 1 m 1,0 h 5 m 1,0 h 2 m 2,0 h 13 m 2,0 h 2 m -48.9999998,1 h 1 m 1,0 h 3 m 5.9999998,0 h 2 m 1,0 h 2 m 2,0 h 3 m 1,0 h 1 m 2,0 h 1 m 3,0 h 1 m 1,0 h 1 m 1,0 h 1 m 1,0 h 2 m 1,0 h 4 m 1,0 h 1 m 3,0 h 2 m -48.9999998,1 h 1 m 1,0 h 2 m 1.9999998,0 h 3 m 3,0 h 2 m 1,0 h 1 m 2,0 h 3 m 1,0 h 5 m 4,0 h 2 m 1,0 h 1 m 1,0 h 2 m 1,0 h 2 m 3,0 h 2 m -44.9999998,1 h 1 m 1,0 h 2 m 2.9999998,0 h 2 m 4,0 h 1 m 1,0 h 1 m 4,0 h 2 m 1,0 h 2 m 4,0 h 3 m 2,0 h 1 m 1,0 h 1 m 1,0 h 1 m 1,0 h 1 m 1,0 h 2 m 1,0 h 1 m 1,0 h 1 m -48.9999998,1 h 2 m 3,0 h 1.9999998 m 2,0 h 1 m 2,0 h 1 m 5,0 h 1 m 1,0 h 3 m 2,0 h 4 m 3,0 h 1 m 1,0 h 3 m 3,0 h 1 m 2,0 h 5 m -47.9999998,1 h 1 m 2,0 h 1 m 3.9999998,0 h 3 m 2,0 h 1 m 1,0 h 1 m 1,0 h 1 m 1,0 h 2 m 1,0 h 2 m 1,0 h 1 m 1,0 h 2 m 1,0 h 5 m 1,0 h 1 m 1,0 h 2 m 4,0 h 3 m -45.9999998,1 h 2 m 1,0 h 3.9999998 m 1,0 h 1 m 1,0 h 2 m 1,0 h 3 m 2,0 h 6 m 2,0 h 2 m 3,0 h 1 m 2,0 h 6 m 3,0 h 2 m 1,0 h 2 m -48.9999998,1 h 1 m 1,0 h 3 m 1.9999998,0 h 3 m 2,0 h 1 m 3,0 h 1 m 1,0 h 1 m 1,0 h 2 m 1,0 h 3 m 2,0 h 2 m 1,0 h 1 m 4,0 h 2 m 2,0 h 1 m 2,0 h 3 m 1,0 h 2 m -48.9999998,1 h 1 m 2,0 h 1 m 1.9999998,0 h 2 m 1,0 h 1 m 1,0 h 1 m 4,0 h 1 m 1,0 h 1 m 2,0 h 1 m 7,0 h 1 m 2,0 h 1 m 5,0 h 1 m 3,0 h 2 m 1,0 h 2 m -45.9999998,1 h 3 m 1,0 h 0.9999998 m 2,0 h 2 m 4,0 h 7 m 1,0 h 1 m 1,0 h 1 m 3,0 h 1 m 1,0 h 2 m 1,0 h 2 m 2,0 h 2 m 1,0 h 1 m 1,0 h 1 m 1,0 h 4 m -42,1 h 1 m 5,0 h 1 m 3,0 h 1 m 2,0 h 1 m 1,0 h 2 m 1,0 h 5 m 1,0 h 1 m 9,0 h 1 m 1,0 h 1 m -42.9999998,1 h 2 m 1,0 h 1 m 1,0 h 0.9999998 m 2,0 h 3 m 2,0 h 2 m 1,0 h 2 m 7,0 h 2 m 4,0 h 2 m 3,0 h 1 m 1,0 h 1 m 2,0 h 1 m 1,0 h 1 m 3,0 h 2 m -47.9999998,1 h 1 m 3,0 h 2.9999998 m 1,0 h 1 m 1,0 h 1 m 4,0 h 1 m 4,0 h 3 m 2,0 h 1 m 4,0 h 3 m 1,0 h 2 m 1,0 h 1 m 2,0 h 1 m 4,0 h 2 m -46.9999998,1 h 3 m 2.9999998,0 h 4 m 1,0 h 1 m 1,0 h 3 m 1,0 h 2 m 1,0 h 2 m 1,0 h 2 m 1,0 h 1 m 2,0 h 7 m 1,0 h 2 m 4,0 h 2 m 2,0 h 1 m -48.9999998,1 h 3 m 2.9999998,0 h 1 m 1,0 h 3 m 2,0 h 1 m 2,0 h 1 m 1,0 h 1 m 1,0 h 1 m 1,0 h 6 m 1,0 h 2 m 1,0 h 2 m 1,0 h 2 m 1,0 h 1 m 1,0 h 5 m 2,0 h 2 m -41,1 h 1 m 2,0 h 1 m 3,0 h 1 m 1,0 h 2 m 1,0 h 1 m 1,0 h 1 m 3,0 h 1 m 1,0 h 1 m 1,0 h 4 m 2,0 h 3 m 1,0 h 1 m 3,0 h 2 m 1,0 h 1 m -47.9999998,1 h 6.9999998 m 1,0 h 1 m 1,0 h 3 m 1,0 h 1 m 2,0 h 2 m 1,0 h 1 m 1,0 h 1 m 1,0 h 1 m 1,0 h 1 m 2,0 h 1 m 1,0 h 3 m 3,0 h 4 m 1,0 h 1 m 1,0 h 2 m 2,0 h 1 m -48.9999998,1 h 1 m 4.9999998,0 h 1 m 2,0 h 2 m 3,0 h 1 m 6,0 h 2 m 3,0 h 1 m 1,0 h 6 m 2,0 h 1 m 2,0 h 2 m 3,0 h 2 m -45.9999998,1 h 1 m 1,0 h 3 m 0.9999998,0 h 1 m 1,0 h 1 m 1,0 h 1 m 4,0 h 3 m 2,0 h 1 m 1,0 h 5 m 3,0 h 3 m 3,0 h 1 m 1,0 h 1 m 1,0 h 5 m 3,0 h 1 m -48.9999998,1 h 1 m 1,0 h 3 m 0.9999998,0 h 1 m 3,0 h 1 m 1,0 h 9 m 3,0 h 1 m 2,0 h 4 m 1,0 h 2 m 1,0 h 1 m 1,0 h 3 m 1,0 h 1 m 3,0 h 1 m 2,0 h 1 m -48.9999998,1 h 1 m 1,0 h 3 m 0.9999998,0 h 1 m 2,0 h 6 m 4,0 h 1 m 4,0 h 1 m 1,0 h 2 m 6,0 h 1 m 1,0 h 1 m 3,0 h 3 m 2,0 h 3 m -47.9999998,1 h 1 m 4.9999998,0 h 1 m 2,0 h 3 m 1,0 h 5 m 3,0 h 3 m 1,0 h 2 m 1,0 h 2 m 2,0 h 3 m 1,0 h 1 m 2,0 h 2 m 1,0 h 1 m 1,0 h 1 m -44.9999998,1 h 6.9999998 m 1,0 h 2 m 3,0 h 4 m 1,0 h 3 m 3,0 h 3 m 2,0 h 2 m 2,0 h 2 m 2,0 h 1 m 2,0 h 1 m 1,0 h 2 m 1,0 h 1 m 2,0 h 1" id="path2"></path><g transform="matrix(0.59673899,0,0,0.59673899,-41.63885,-45.932143)" id="g9"><path d="m 47.04618,121.24325 11.846577,1e-5 1.4e-5,7.10747 H 53.92288 l 4.969901,4.54859 -4.221946,-10e-6 -4.873966,-4.54858 9e-6,4.54858 h -2.750674 l -1.5e-5,-7.2254 h 8.685849 l -4e-6,-1.72954 -8.685848,-1e-5 z" style="fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="translate(44.489179,-34.725676)" id="path1-3"></path><path d="m 60.122943,132.89932 h 2.895255 l -2.4e-5,-11.67968 H 60.12292 Z" style="fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="translate(44.489179,-34.725676)" id="path2-6"></path><path d="m 36.9373,130.0801 -1.8e-5,-8.83685 h -2.267948 c -0.410139,0 -0.723834,0.30822 -0.723833,0.68679 4e-6,2.08551 -0.02409,8.22117 -0.02409,10.25852 0,0.37908 0.313697,0.71075 0.699725,0.71075 1.568224,0 6.079839,0 6.731002,0 l -6e-6,-2.8192 z" style="fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="translate(44.489179,-34.725676)" id="path3"></path><path d="m 42.848035,135.81332 c 0.265729,0 2.292229,0 2.968012,0 0,0 -1.2e-5,-5.75692 -1.2e-5,-5.85164 -0.965283,0 -1.978108,0 -2.968011,0 3e-6,1.94262 7e-6,3.88524 1.1e-5,5.85164 z" style="fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="translate(44.489179,-34.725676)" id="path4"></path><path d="m 38.384867,121.24325 c 0,0.0477 6e-6,2.91385 6e-6,2.91385 1.327031,0 3.015639,0 4.463139,0 4e-6,2.01431 9e-6,4.35946 9e-6,4.35946 0.675783,0 2.702282,0 2.968011,0 l -1.3e-5,-6.56222 c -10e-7,-0.37942 -0.314122,-0.68763 -0.699556,-0.71109 -1.4475,0 -4.873957,0 -6.731596,0 z" style="fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="translate(44.489179,-34.725676)" id="path5"></path><path d="m 38.384876,125.57843 c 2e-6,0.97156 4e-6,1.94312 6e-6,2.96158 0.241278,0 0.506667,0 0.747946,0 0.675867,0 1.519747,0 2.19553,0 0,0 -6e-6,-2.91384 -6e-6,-2.96158 -0.965283,0 -1.954252,0 -2.943476,0 z m 2.07498,2.06121 v 0 c -0.2895,0 -0.627391,0 -0.89312,0 -0.0961,0 -0.192632,0 -0.313271,0 -10e-7,-0.40286 -2e-6,-0.78143 -3e-6,-1.1843 0.410055,0 0.796338,0 1.206392,0 0,0.0235 2e-6,1.1843 2e-6,1.1843 z" style="fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="translate(44.489179,-34.725676)" id="path6"></path><path d="m 77.228905,129.96169 9e-6,4.35913 c 10e-7,0.37899 -0.33789,0.68704 -0.723324,0.68704 h -4.439283 l 2e-6,0.71066 h 5.162608 0.02462 c 0.361663,10e-6 0.674934,-0.30796 0.674933,-0.68704 v -0.0236 l -1e-5,-5.04617 z" style="fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="translate(44.489179,-34.725676)" id="path7"></path><path d="m 32.715088,124.13364 -9e-6,-4.35946 c -1e-6,-0.37857 0.289499,-0.66334 0.675527,-0.66334 h 4.439368 c 0.02411,0 0.02411,-0.0234 0.02411,-0.0234 l -2e-6,-0.66334 c 0,0 0,-0.0234 -0.02411,-0.0234 l -5.114896,-1e-5 c -0.410139,0 -0.723834,0.30822 -0.723833,0.71025 l 10e-6,5.0228 c 0,0.0235 0.02411,0.0235 0.02411,0.0235 h 0.675613 c 0,0 0.02411,0 0.02411,-0.0235 z" style="fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="translate(44.489179,-34.725676)" id="path8"></path><path d="m 75.974111,124.13366 -6e-6,-2.8904 H 64.272703 l 8e-6,4.33517 6e-6,2.91469 h 7.793577 l 3e-6,1.44486 H 64.27272 l 6e-6,2.91393 11.701402,1e-5 -1.4e-5,-7.24919 -7.792728,-10e-6 -3e-6,-1.46906 z" style="fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="translate(44.489179,-34.725676)" id="path9"></path></g><g id="text1" style="font-weight:700;font-size:16px;font-family:Helvetica, Arial, sans-serif" transform="matrix(0.19781531,0,0,0.19781531,32.930454,5.7573735)" aria-label="WIRAHASTA 
+HASIL BUMI"><path d="M 12.09113,15 15.436895,3.3360002 H 12.803348 L 10.99796,12.088 9.043503,3.3360002 H 6.5921506 L 4.7205098,12.072 2.8488691,3.3360002 H 0.2153215 L 3.6273391,15 h 2.236031 L 7.83439,5.8960001 9.8550995,15 Z M 19.163586,3.3360002 H 16.679107 V 15 h 2.484479 z M 24.049727,10.376 h 2.848869 c 1.076607,0 1.540377,0.416 1.540377,1.376 v 0.48 c -0.01656,0.304 -0.01656,0.592 -0.01656,0.768 0,1.104 0.06625,1.44 0.364391,2 h 2.666674 v -0.432 c -0.380954,-0.208 -0.530023,-0.448 -0.530023,-0.96 -0.06625,-3.44 -0.132505,-3.6 -1.672882,-4.2399999 1.358182,-0.512 2.037273,-1.456 2.037273,-2.88 0,-0.9279999 -0.331264,-1.7759999 -0.910976,-2.3519999 -0.546585,-0.544 -1.308492,-0.8 -2.33541,-0.8 H 21.565248 V 15 h 2.484479 z m 0,-1.9999999 V 5.3360002 h 2.997937 c 0.712218,0 0.993792,0.064 1.308493,0.304 0.298137,0.2399999 0.447206,0.6399999 0.447206,1.1839999 0,0.56 -0.149069,1.008 -0.447206,1.248 -0.281575,0.224 -0.596275,0.304 -1.308493,0.304 z M 40.530055,12.648 41.325088,15 H 43.87582 L 39.701895,3.3360002 h -2.74949 L 32.662538,15 h 2.534169 l 0.811596,-2.352 z m -0.679091,-2 H 36.703957 L 38.277461,6.0880001 Z M 52.588029,9.7040001 V 15 h 2.484479 V 3.3360002 H 52.571466 V 7.7040001 H 47.801267 V 3.3360002 H 45.316788 V 15 h 2.484479 V 9.7040001 Z M 64.314715,12.648 65.109748,15 H 67.66048 L 63.486556,3.3360002 h -2.74949 L 56.447199,15 h 2.534168 l 0.811597,-2.352 z m -0.679091,-2 h -3.147006 l 1.573503,-4.5599999 z m 14.09522,-3.7599999 c -0.01656,-2.4159999 -1.689445,-3.7439999 -4.737073,-3.7439999 -2.898558,0 -4.571441,1.312 -4.571441,3.5839999 0,1.808 0.944102,2.688 3.395455,3.136 L 73.50723,10.184 c 1.65632,0.304 2.269158,0.752 2.269158,1.696 0,0.976 -0.927539,1.568 -2.43479,1.568 -1.689445,0 -2.633547,-0.688 -2.716363,-1.936 h -2.418226 c 0.149069,2.496 1.92133,3.856 5.002084,3.856 3.11388,0 4.952394,-1.392 4.952394,-3.776 0,-1.8399999 -0.960665,-2.7999999 -3.196696,-3.2159999 l -1.888204,-0.352 c -1.772261,-0.336 -2.28572,-0.672 -2.28572,-1.52 0,-0.8799999 0.795033,-1.4399999 2.086962,-1.4399999 1.573503,0 2.451353,0.64 2.534169,1.8239999 z m 7.238095,-1.5519999 h 3.52796 v -2 h -9.672905 v 2 H 82.48446 V 15 h 2.484479 z M 95.552768,12.648 96.347801,15 h 2.550731 L 94.724608,3.3360002 h -2.74949 L 87.685251,15 h 2.534169 l 0.811596,-2.352 z m -0.679091,-2 H 91.72667 l 1.573503,-4.5599999 z" id="path10"></path><path d="m 8.3975385,30.407991 v 5.296 h 2.4844785 v -11.664 H 8.3809753 v 4.368 H 3.6107759 v -4.368 H 1.1262971 v 11.664 h 2.4844788 v -5.296 z m 11.7266885,2.944 0.795034,2.352 h 2.550731 l -4.173924,-11.664 h -2.74949 l -4.289867,11.664 h 2.534168 l 0.811597,-2.352 z m -0.679091,-2 H 16.29813 l 1.573503,-4.56 z m 14.095222,-3.76 c -0.01656,-2.416 -1.689446,-3.744 -4.737073,-3.744 -2.898559,0 -4.571442,1.312 -4.571442,3.584 0,1.808 0.944102,2.688 3.395455,3.136 l 1.689445,0.32 c 1.65632,0.304 2.269158,0.752 2.269158,1.696 0,0.976 -0.927539,1.568 -2.434789,1.568 -1.689446,0 -2.633548,-0.688 -2.716364,-1.936 h -2.418226 c 0.149069,2.496 1.92133,3.856 5.002084,3.856 3.11388,0 4.952395,-1.392 4.952395,-3.776 0,-1.84 -0.960666,-2.8 -3.196697,-3.216 l -1.888204,-0.352 c -1.772261,-0.336 -2.28572,-0.672 -2.28572,-1.52 0,-0.88 0.795033,-1.44 2.086962,-1.44 1.573503,0 2.451353,0.64 2.534169,1.824 z m 4.521747,-3.552 h -2.484479 v 11.664 h 2.484479 z m 4.886139,0 h -2.484479 v 11.664 h 8.265033 v -2 h -5.780554 z m 12.273295,11.664 h 5.432727 c 1.391309,0 2.318847,-0.256 3.047628,-0.848 0.72878,-0.592 1.19255,-1.568 1.19255,-2.512 0,-1.152 -0.629402,-2.064 -2.004147,-2.832 1.19255,-0.736 1.65632,-1.408 1.65632,-2.4 0,-0.816 -0.41408,-1.648 -1.093171,-2.224 -0.712217,-0.592 -1.55694,-0.848 -2.848869,-0.848 h -5.383038 z m 2.484479,-9.664 h 2.699801 c 1.159423,0 1.755698,0.448 1.755698,1.312 0,0.88 -0.596275,1.328 -1.755698,1.328 h -2.699801 z m 0,4.64 h 2.964812 c 1.209113,0 1.838514,0.512 1.838514,1.52 0,0.992 -0.629401,1.504 -1.838514,1.504 h -2.964812 z m 16.463784,-6.64 v 7.904 c 0,1.408 -0.745344,2.08 -2.302284,2.08 -1.55694,0 -2.302284,-0.672 -2.302284,-2.08 v -7.904 h -2.484479 v 7.904 c 0,1.312 0.364391,2.24 1.175987,2.944 0.877849,0.768 2.153215,1.184 3.610776,1.184 1.457561,0 2.732927,-0.416 3.610776,-1.184 0.811596,-0.704 1.175987,-1.632 1.175987,-2.944 v -7.904 z m 7.188396,2.576 2.169778,9.088 h 2.484479 l 2.136652,-9.088 v 9.088 h 2.484478 v -11.664 h -3.743281 l -2.120089,9.28 -2.186341,-9.28 h -3.710155 v 11.664 h 2.484479 z m 13.747422,-2.576 h -2.484479 v 11.664 h 2.484479 z" id="path11"></path></g></g></svg>
+                </div>
+            </div></article>
+        </div></div>
+
+    <!-- Smart Floating Footer Wrapper -->
+    <div class="footer-wrapper" id="footerWrapper" style="bottom: 0px;">
+        <!-- Panel Indikator Keterbacaan Real-time -->
+        <div class="readability-panel" id="readabilityPanel" style="display: none;">
+            <div class="readability-item" title="Jumlah kata pada kalimat aktif tempat kursor berada">
+                <span class="status-dot" id="dotKalimat" style="background-color: rgb(113, 128, 150);"></span>
+                <span>Kalimat: <strong id="valKalimat">0</strong> kata</span>
+            </div>
+            <div class="readability-item" title="Jumlah kalimat pada paragraf aktif tempat kursor berada">
+                <span class="status-dot" id="dotParagraf" style="background-color: rgb(113, 128, 150);"></span>
+                <span>Paragraf: <strong id="valParagraf">0</strong> kalimat</span>
+            </div>
+            <div class="readability-item" title="Total kata pada halaman aktif saat ini">
+                <span class="status-dot" id="dotHalaman" style="background-color: rgb(113, 128, 150);"></span>
+                <span>Halaman: <strong id="valHalaman">20</strong> kata</span>
+            </div>
+        </div>
+
+        <!-- Menu Action Bar -->
+        <footer class="reader-footer">
+            <div class="footer-group" id="editorTools" style="display: none;">
+                <button class="f-btn" onclick="addNewPage()">+H</button>
+                <button class="f-btn" onclick="triggerImportMD()">+md</button>
+                <button class="f-btn" id="btnBold" onclick="formatText('bold')">B</button>
+                <button class="f-btn" id="btnItalic" onclick="formatText('italic')">I</button>
+                <button class="f-btn" id="btnQuote" onclick="formatQuote()">Q</button>
+                <button class="f-btn primary" onclick="openModal()" aria-label="Simpan">↓</button>
+            </div>
+
+            <div class="page-dots" id="pageDots"><span class="dot "></span><span class="dot "></span><span class="dot "></span><span class="dot "></span><span class="dot active"></span></div>
+
+            <div class="footer-group">
+                <button class="f-btn" id="btnShare" aria-label="Bagikan link halaman ini" title="Bagikan link" style="display: inline-flex;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3" fill="currentColor"></circle><circle cx="6" cy="12" r="3" fill="currentColor"></circle><circle cx="18" cy="19" r="3" fill="currentColor"></circle><path d="M8.6 10.5l6.8-4M8.6 13.5l6.8 4"></path></svg></button>
+                <button class="f-btn" id="btnTheme" aria-label="Ganti tema terang atau gelap" aria-pressed="false" title="Mode gelap" style="display: inline-flex;"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg></button>
+                <button class="f-btn" id="btnDecrease">-A</button>
+                <span class="font-indicator" id="fontIndicator">16px</span>
+                <button class="f-btn" id="btnIncrease">+A</button>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const container = document.getElementById('pagesContainer');
+        const pageDotsContainer = document.getElementById('pageDots');
+        const editorTools = document.getElementById('editorTools');
+        const fontIndicator = document.getElementById('fontIndicator');
+        const saveModal = document.getElementById('saveModal');
+        const footerWrapper = document.getElementById('footerWrapper');
+
+        // Indikator Elements
+        const dotKalimat = document.getElementById('dotKalimat');
+        const valKalimat = document.getElementById('valKalimat');
+        const dotParagraf = document.getElementById('dotParagraf');
+        const valParagraf = document.getElementById('valParagraf');
+        const dotHalaman = document.getElementById('dotHalaman');
+        const valHalaman = document.getElementById('valHalaman');
+
+        // Ukuran font awal dibaca dari CSS (di file publish nilainya sudah diset sesuai saat publish)
+        let currentFontSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--base-font-size'), 10) || 16;
+        let isPublished = false;
+
+        // Color Palette Constants
+        const COLORS = {
+            KURANG: '#718096',   // <5 kata | 1 kalimat | <100 kata
+            CUKUP: '#ECC94B',    // 5-6 kata | 2 kalimat | 100-110 kata
+            BAGUS: '#38A169',    // 7-14 kata | 3 kalimat | 111-135 kata (Ideal)
+            AGAK: '#DD6B20',     // 15 kata | 4 kalimat | 136-150 kata
+            TERLALU: '#E53E3E'   // >15 kata | >4 kalimat | >150 kata
+        };
+
+        // Visual Viewport API untuk Keyboard Virtual
+        // Menu selalu menempel di atas keyboard: posisi dihitung ulang setiap kali
+        // viewport visual berubah ukuran ATAU bergeser (scroll saat keyboard muncul).
+        // Mode desktop di ponsel/tablet: layar sentuh tetapi lebarnya besar (~980px).
+        // Perbesar tampilan agar kolom 480px memenuhi lebar browser.
+        let currentScale = 1;
+        function applyScale() {
+            let s = 1;
+            try {
+                const coarse = window.matchMedia('(pointer: coarse)').matches;
+                // Lebar acuan = lebar layar fisik dalam CSS px (mis. 412) seperti saat mode ponsel,
+                // sehingga ukuran font di mode desktop sama dengan di mode ponsel.
+                const devW = Math.min(window.screen.width, window.screen.height) || 480;
+                const refW = Math.min(480, Math.max(300, devW));
+                if (coarse && window.innerWidth > 600) s = Math.min(3, window.innerWidth / refW);
+            } catch (e) {}
+            currentScale = s;
+            document.documentElement.style.setProperty('--s', s);
+        }
+        applyScale();
+
+        // Jarak antara dasar bingkai halaman dan dasar layar (ada jika layar lebih tinggi dari bingkai)
+        function frameGap() {
+            return Math.max(0, window.innerHeight - container.clientHeight);
+        }
+
+        function positionFooter() {
+            const vv = window.visualViewport;
+            if (!vv) return;
+            const keyboardHeight = window.innerHeight - vv.height - vv.offsetTop;
+            footerWrapper.style.bottom = `${Math.max(keyboardHeight, frameGap()) / currentScale}px`;
+        }
+
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', positionFooter);
+            window.visualViewport.addEventListener('scroll', positionFooter);
+            window.addEventListener('scroll', positionFooter);
+            // Keyboard butuh waktu untuk muncul/hilang; hitung ulang setelah fokus berubah
+            document.addEventListener('focusin', () => {
+                positionFooter();
+                setTimeout(positionFooter, 150);
+                setTimeout(positionFooter, 400);
+            });
+            document.addEventListener('focusout', () => {
+                setTimeout(positionFooter, 150);
+                setTimeout(positionFooter, 400);
+            });
+        }
+
+        window.addEventListener('resize', () => {
+            applyScale();
+            if (window.visualViewport) positionFooter();
+            else footerWrapper.style.bottom = `${frameGap() / currentScale}px`;
+        });
+
+        // ==========================================================================
+        // TEMA TERANG / GELAP (tombol ketuk, tampil di file hasil publish)
+        // Default selalu terang; pilihan pembaca diingat di browser.
+        // ==========================================================================
+        const THEME_KEY = 'tema-artikel';
+        const btnTheme = document.getElementById('btnTheme');
+        const ICON_MOON = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+        const ICON_SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+
+        function applyTheme(theme, save) {
+            const dark = theme === 'dark';
+            if (dark) document.documentElement.setAttribute('data-theme', 'dark');
+            else document.documentElement.removeAttribute('data-theme');
+            // Ikon menunjukkan mode tujuan: bulan = ketuk untuk gelap, matahari = ketuk untuk terang
+            btnTheme.innerHTML = dark ? ICON_SUN : ICON_MOON;
+            btnTheme.setAttribute('aria-pressed', dark ? 'true' : 'false');
+            btnTheme.title = dark ? 'Mode terang' : 'Mode gelap';
+            const tc = document.querySelector('meta[name="theme-color"]');
+            if (tc) tc.setAttribute('content', dark ? '#121212' : '#FBF8F3');
+            if (save) { try { localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light'); } catch (e) {} }
+        }
+
+        btnTheme.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            applyTheme(isDark ? 'light' : 'dark', true);
+        });
+
+        (function initTheme() {
+            // Tema hanya dipulihkan di file hasil publish (terkunci); editor selalu terang
+            let saved = 'light';
+            if (document.body.classList.contains('no-select')) {
+                try { saved = localStorage.getItem(THEME_KEY) === 'dark' ? 'dark' : 'light'; } catch (e) {}
+            }
+            applyTheme(saved, false);
+        })();
+
+        // Halaman ucapan terima kasih (selalu terakhir)
+        function getThanksPage() {
+            return container.querySelector('.thanks-page');
+        }
+
+        // Pastikan halaman terima kasih selalu berada di urutan terakhir
+        function ensureThanksLast() {
+            const thanks = getThanksPage();
+            if (thanks && container.lastElementChild !== thanks) {
+                container.appendChild(thanks);
+            }
+        }
+
+        // ==========================================================================
+        // REAL-TIME READABILITY ENGINE
+        // ==========================================================================
+        function getWordsCount(text) {
+            if (!text) return 0;
+            const cleaned = text.trim();
+            if (!cleaned) return 0;
+            return cleaned.split(/\s+/).length;
+        }
+
+        // Singkatan umum (Indonesia & Inggris) yang titiknya BUKAN akhir kalimat
+        const ABBREVIATIONS = new Set([
+            'dr', 'drs', 'dra', 'prof', 'ir', 'hj', 'h', 'sdr', 'sdri', 'tn', 'ny', 'st', 'no', 'nos',
+            'dll', 'dsb', 'dst', 'dkk', 'yg', 'dg', 'dgn', 'tgl', 'hlm', 'mis', 'jl', 'kec', 'kab', 'kel',
+            'rt', 'rw', 'pt', 'cv', 'tbk', 'spt', 'sbb', 'thd', 'ttg', 'sd', 'bpk', 'ibu', 'hal',
+            'rp', 'vs', 'mr', 'mrs', 'ms', 'e.g', 'i.e', 'etc', 'cf', 'approx', 'fig', 'inc', 'ltd', 'co'
+        ]);
+
+        // Mengembalikan rentang {start, end} untuk tiap kalimat dalam teks
+        function getSentenceSpans(text) {
+            if (!text) return [];
+            const spans = [];
+            let start = 0;
+            // Kandidat batas kalimat: tanda baca akhir (+ tanda kutip/kurung penutup) lalu spasi atau akhir teks
+            const re = /[.!?]+["'”’)\]]*(?=\s|$)/g;
+            let m;
+            while ((m = re.exec(text)) !== null) {
+                const end = m.index + m[0].length;
+                const punct = m[0].replace(/["'”’)\]]+$/, '');
+                const onlyDots = /^\.+$/.test(punct);
+
+                if (onlyDots) {
+                    // Kata tepat sebelum titik
+                    const before = text.slice(start, m.index);
+                    const lastWordMatch = before.match(/([\p{L}\p{N}.]+)$/u);
+                    const lastWord = lastWordMatch ? lastWordMatch[1].toLowerCase() : '';
+
+                    // Singkatan, inisial satu huruf (mis. "A."), atau nomor urut (mis. "1.")
+                    if (punct === '.' && lastWord) {
+                        if (ABBREVIATIONS.has(lastWord)) continue;
+                        if (/^\p{L}$/u.test(lastWord)) continue;
+                        if (/^\d+$/.test(lastWord)) continue;
+                    }
+
+                    // Jika setelahnya huruf kecil, kalimat dianggap masih berlanjut (mis. "dll. dan", "...lalu")
+                    const next = text.slice(end).match(/^\s*(\S)/);
+                    if (next && /\p{Ll}/u.test(next[1])) continue;
+                }
+
+                spans.push({ start, end });
+                start = end;
+            }
+            if (start < text.length) spans.push({ start, end: text.length });
+
+            // Buang rentang tanpa huruf/angka (mis. sisa spasi atau tanda baca saja)
+            return spans.filter(s => /[\p{L}\p{N}]/u.test(text.slice(s.start, s.end)));
+        }
+
+        function getSentences(text) {
+            return getSentenceSpans(text).map(s => text.slice(s.start, s.end));
+        }
+
+        function getColorForKalimat(wordsCount) {
+            if (wordsCount < 5) return COLORS.KURANG;
+            if (wordsCount <= 6) return COLORS.CUKUP;
+            if (wordsCount <= 14) return COLORS.BAGUS;
+            if (wordsCount === 15) return COLORS.AGAK;
+            return COLORS.TERLALU;
+        }
+
+        function getColorForParagraf(sentenceCount) {
+            if (sentenceCount <= 1) return COLORS.KURANG;
+            if (sentenceCount === 2) return COLORS.CUKUP;
+            if (sentenceCount === 3) return COLORS.BAGUS;
+            if (sentenceCount === 4) return COLORS.AGAK;
+            return COLORS.TERLALU;
+        }
+
+        function getColorForHalaman(wordsCount) {
+            if (wordsCount < 100) return COLORS.KURANG;
+            if (wordsCount <= 110) return COLORS.CUKUP;
+            if (wordsCount <= 135) return COLORS.BAGUS;
+            if (wordsCount <= 150) return COLORS.AGAK;
+            return COLORS.TERLALU;
+        }
+
+        // Elemen blok: setiap blok adalah satu paragraf tersendiri
+        const BLOCK_TAGS = new Set(['DIV', 'P', 'BLOCKQUOTE', 'H1', 'H2', 'UL', 'OL', 'LI']);
+
+        // Teks dengan jeda baris antar blok (agar kata antar paragraf tidak menyatu)
+        function getTextWithBreaks(node) {
+            let out = '';
+            node.childNodes.forEach(c => {
+                if (c.nodeType === Node.TEXT_NODE) {
+                    out += c.nodeValue;
+                } else if (c.nodeName === 'BR') {
+                    out += '\n';
+                } else if (c.nodeType === Node.ELEMENT_NODE) {
+                    if (c.classList.contains('thanks-footer')) return;
+                    const isBlock = BLOCK_TAGS.has(c.nodeName);
+                    if (isBlock) out += '\n';
+                    out += getTextWithBreaks(c);
+                    if (isBlock) out += '\n';
+                }
+            });
+            return out;
+        }
+
+        // Teks MILIK blok ini saja (tanpa blok anak) + posisi kursor di dalamnya.
+        // Saat Enter ditekan di dalam elemen editable, browser membuat blok anak baru;
+        // blok anak itu adalah paragraf terpisah dan tidak boleh ikut terhitung di paragraf induk.
+        function getOwnTextAndCaret(block, selection) {
+            const anchorNode = selection.anchorNode;
+            const anchorOffset = selection.anchorOffset;
+            let text = '';
+            let caretPos = null;
+            const nodes = block.childNodes;
+
+            for (let i = 0; i < nodes.length; i++) {
+                const c = nodes[i];
+
+                if (anchorNode === block && anchorOffset === i && caretPos === null) {
+                    caretPos = text.length;
+                }
+
+                if (c.nodeType === Node.ELEMENT_NODE && BLOCK_TAGS.has(c.nodeName)) continue;
+                if (c.nodeType === Node.COMMENT_NODE) continue;
+
+                const t = c.nodeName === 'BR' ? ' ' : (c.textContent || '');
+
+                if (caretPos === null && c.contains(anchorNode)) {
+                    let off;
+                    if (c.nodeType === Node.TEXT_NODE) {
+                        off = anchorOffset;
+                    } else {
+                        const r = document.createRange();
+                        r.selectNodeContents(c);
+                        r.setEnd(anchorNode, anchorOffset);
+                        off = r.toString().length;
+                    }
+                    caretPos = text.length + off;
+                }
+
+                text += t;
+            }
+
+            if (caretPos === null) caretPos = text.length;
+            return { text, caretPos };
+        }
+
+        function updateReadabilityMetrics() {
+            if (isPublished) return;
+
+            const selection = window.getSelection();
+            
+            // 1. Total Kata per Halaman Aktif
+            const currentPageIndex = Math.round(container.scrollLeft / container.clientWidth);
+            const currentPage = container.children[currentPageIndex];
+            
+            let totalWordsPage = 0;
+            if (currentPage) {
+                // Teks tulisan merek di footer halaman terima kasih tidak dihitung
+                const art = currentPage.querySelector('article');
+                if (art) totalWordsPage = getWordsCount(getTextWithBreaks(art));
+            }
+            
+            valHalaman.textContent = totalWordsPage;
+            dotHalaman.style.backgroundColor = getColorForHalaman(totalWordsPage);
+
+            // Jika kursor tidak berada di dalam area editor
+            if (!selection || selection.rangeCount === 0) {
+                resetLocalMetrics();
+                return;
+            }
+
+            const anchorNode = selection.anchorNode;
+            if (!anchorNode) {
+                resetLocalMetrics();
+                return;
+            }
+
+            // Cari blok (paragraf) terdalam tempat kursor berada
+            let targetEl = anchorNode.nodeType === Node.TEXT_NODE ? anchorNode.parentElement : anchorNode;
+            targetEl = targetEl && targetEl.closest('p, blockquote, h1, h2, div');
+
+            if (!targetEl || targetEl.classList.contains('page') || !currentPage ||
+                !currentPage.contains(targetEl) || targetEl.closest('.thanks-footer')) {
+                resetLocalMetrics();
+                return;
+            }
+
+            // 2. Paragraf Aktif: hanya teks milik blok ini (Enter = paragraf baru)
+            const own = getOwnTextAndCaret(targetEl, selection);
+            const fullParaText = own.text;
+            const spans = getSentenceSpans(fullParaText);
+            const countSentenceInPara = spans.length;
+
+            valParagraf.textContent = countSentenceInPara;
+            dotParagraf.style.backgroundColor = getColorForParagraf(countSentenceInPara);
+
+            // 3. Kalimat Aktif tempat kursor berada
+            const caretPos = own.caretPos;
+            let activeSentenceText = '';
+            for (const sp of spans) {
+                if (caretPos >= sp.start && caretPos <= sp.end) {
+                    activeSentenceText = fullParaText.slice(sp.start, sp.end);
+                    break;
+                }
+            }
+
+            const activeSentenceWords = getWordsCount(activeSentenceText);
+            valKalimat.textContent = activeSentenceWords;
+            dotKalimat.style.backgroundColor = getColorForKalimat(activeSentenceWords);
+        }
+
+        function resetLocalMetrics() {
+            valKalimat.textContent = '0';
+            dotKalimat.style.backgroundColor = COLORS.KURANG;
+            valParagraf.textContent = '0';
+            dotParagraf.style.backgroundColor = COLORS.KURANG;
+        }
+
+        // Attach listeners untuk real-time update
+        document.addEventListener('selectionchange', () => {
+            updateReadabilityMetrics();
+            updateFormatToolbarState();
+        });
+
+        container.addEventListener('input', updateReadabilityMetrics);
+        container.addEventListener('keyup', updateReadabilityMetrics);
+        container.addEventListener('scroll', () => {
+            updateDots();
+            updateReadabilityMetrics();
+        });
+
+        // ==========================================================================
+        // TOOLBAR & SELECTION FORMAT STATE
+        // ==========================================================================
+        function updateFormatToolbarState() {
+            if (isPublished) return;
+            document.getElementById('btnBold').classList.toggle('active', document.queryCommandState('bold'));
+            document.getElementById('btnItalic').classList.toggle('active', document.queryCommandState('italic'));
+            try {
+                const block = document.queryCommandValue('formatBlock');
+                const isQuote = block && block.toLowerCase() === 'blockquote';
+                document.getElementById('btnQuote').classList.toggle('active', isQuote);
+            } catch (e) {}
+        }
+
+        function formatText(command) {
+            if (isPublished) return;
+            document.execCommand(command, false, null);
+        }
+
+        function formatQuote() {
+            if (isPublished) return;
+            const currentBlock = document.queryCommandValue('formatBlock');
+            if (currentBlock && currentBlock.toLowerCase() === 'blockquote') {
+                document.execCommand('formatBlock', false, '<p>');
+            } else {
+                document.execCommand('formatBlock', false, '<blockquote>');
+            }
+        }
+
+        function addNewPage() {
+            if (isPublished) return;
+            const thanks = getThanksPage();
+            // Halaman terima kasih ikut terhitung di children, sehingga nomor halaman baru = children.length
+            const pageCount = thanks ? container.children.length : container.children.length + 1;
+            const newPage = document.createElement('div');
+            newPage.className = 'page';
+            newPage.innerHTML = `
+                <article>
+                    <h1 contenteditable="true" placeholder="Judul Halaman ${pageCount}...">Judul Halaman ${pageCount}</h1>
+                    <div class="meta" contenteditable="true" placeholder="Meta info...">Lanjutan Artikel</div>
+                    <p contenteditable="true" placeholder="Ketik isi halaman...">Ketik paragraf Anda di sini...</p>
+                </article>
+            `;
+            // Sisipkan sebelum halaman terima kasih agar halaman tersebut tetap terakhir
+            if (thanks) {
+                container.insertBefore(newPage, thanks);
+            } else {
+                container.appendChild(newPage);
+            }
+            updateDots();
+            const newIndex = Array.prototype.indexOf.call(container.children, newPage);
+            container.scrollTo({ left: newIndex * container.clientWidth, behavior: 'smooth' });
+            scheduleSave();
+            setTimeout(updateReadabilityMetrics, 300);
+        }
+
+        // ==========================================================================
+        // BAGIKAN LINK (alamat halaman yang sedang dibuka)
+        // ==========================================================================
+        const btnShare = document.getElementById('btnShare');
+        let toastTimer = null;
+
+        function showToast(msg) {
+            let t = document.getElementById('toast');
+            if (!t) {
+                t = document.createElement('div');
+                t.id = 'toast';
+                t.className = 'toast';
+                t.setAttribute('role', 'status');
+                document.body.appendChild(t);
+            }
+            t.textContent = msg;
+            // paksa reflow agar transisi berjalan
+            void t.offsetWidth;
+            t.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+        }
+
+        async function copyText(text) {
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(text);
+                    return true;
+                }
+            } catch (e) {}
+            // Cadangan untuk browser/konteks tanpa Clipboard API
+            try {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.setAttribute('readonly', '');
+                ta.style.cssText = 'position:fixed;top:-1000px;opacity:0;';
+                document.body.appendChild(ta);
+                ta.select();
+                const ok = document.execCommand('copy');
+                ta.remove();
+                return ok;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        btnShare.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            // Alamat halaman yang sedang dibuka, tanpa bagian #...
+            const url = window.location.href.split('#')[0];
+            const title = document.title;
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title, url });
+                    return;
+                } catch (err) {
+                    if (err && err.name === 'AbortError') return; // pembaca membatalkan
+                }
+            }
+            showToast((await copyText(url)) ? 'Link disalin' : 'Gagal menyalin link');
+        });
+
+        // ==========================================================================
+        // PINDAH HALAMAN DENGAN PANAH KIRI / KANAN (keyboard)
+        // Tidak aktif saat kursor sedang berada di teks yang bisa diedit,
+        // agar panah tetap menggeser kursor seperti biasa.
+        // ==========================================================================
+        function goToPage(delta) {
+            const total = container.children.length;
+            const current = Math.round(container.scrollLeft / container.clientWidth);
+            const target = Math.min(total - 1, Math.max(0, current + delta));
+            if (target === current) return;
+            container.scrollTo({ left: target * container.clientWidth, behavior: 'smooth' });
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+            if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || e.defaultPrevented) return;
+            const t = e.target;
+            if (t && (t.isContentEditable || (t.closest && t.closest('[contenteditable="true"], input, textarea, select')))) return;
+            // Di file publish, pop-up simpan sudah dihapus (saveModal = null)
+            if (saveModal && saveModal.style.display === 'flex') return;
+            e.preventDefault();
+            goToPage(e.key === 'ArrowRight' ? 1 : -1);
+        });
+
+        function updateDots() {
+            const totalPages = container.children.length;
+            const pageIndex = Math.round(container.scrollLeft / container.clientWidth);
+            pageDotsContainer.innerHTML = '';
+            for (let i = 0; i < totalPages; i++) {
+                const dot = document.createElement('span');
+                dot.className = `dot ${i === pageIndex ? 'active' : ''}`;
+                pageDotsContainer.appendChild(dot);
+            }
+        }
+
+        function updateFontSize(newSize) {
+            currentFontSize = Math.min(Math.max(newSize, 12), 24);
+            document.documentElement.style.setProperty('--base-font-size', currentFontSize + 'px');
+            fontIndicator.textContent = currentFontSize + 'px';
+            if (typeof scheduleSave === 'function') scheduleSave();
+        }
+
+        document.getElementById('btnDecrease').addEventListener('click', (e) => {
+            e.stopPropagation();
+            updateFontSize(currentFontSize - 1);
+        });
+
+        document.getElementById('btnIncrease').addEventListener('click', (e) => {
+            e.stopPropagation();
+            updateFontSize(currentFontSize + 1);
+        });
+
+        function openModal() { saveModal.style.display = 'flex'; }
+        function closeModal() { saveModal.style.display = 'none'; }
+
+        function getGeneratedSlug() {
+            const firstTitle = document.querySelector('h1').innerText.trim() || 'artikel';
+            return firstTitle
+                .toLowerCase()
+                .replace(/[^a-z0-9\s-]/g, '')
+                .trim()
+                .replace(/\s+/g, '-') || 'artikel';
+        }
+
+        // ==========================================================================
+        // IMPORT & EXPORT MARKDOWN (.md)
+        // ==========================================================================
+        // Penanda halaman terima kasih di file MD (komentar HTML, tak terlihat di penampil MD lain)
+        const THANKS_MARKER = '<!-- terimakasih -->';
+
+        // Elemen -> daftar paragraf MD. Tebal, miring, dan tautan dikonversi;
+        // Enter (div/p di dalam paragraf) dan <br> menjadi paragraf terpisah.
+        function blockToParagraphs(el) {
+            const paras = [];
+            let cur = '';
+            const flush = () => { if (cur.trim()) paras.push(cur.trim()); cur = ''; };
+            (function walk(n) {
+                n.childNodes.forEach(c => {
+                    if (c.nodeType === Node.TEXT_NODE) {
+                        cur += c.nodeValue.replace(/\u00a0/g, ' ');
+                    } else if (c.nodeType === Node.ELEMENT_NODE) {
+                        const tag = c.tagName.toLowerCase();
+                        if (tag === 'br') {
+                            flush();
+                        } else if (['div', 'p', 'blockquote', 'h2', 'li'].includes(tag)) {
+                            flush(); walk(c); flush();
+                        } else if (tag === 'b' || tag === 'strong') {
+                            cur += '**'; walk(c); cur += '**';
+                        } else if (tag === 'i' || tag === 'em') {
+                            cur += '*'; walk(c); cur += '*';
+                        } else if (tag === 'a') {
+                            cur += '['; walk(c); cur += `](${c.getAttribute('href') || ''})`;
+                        } else {
+                            walk(c);
+                        }
+                    }
+                });
+            })(el);
+            flush();
+            return paras;
+        }
+
+        function buildMarkdown() {
+            let mdContent = "";
+            // Halaman terima kasih selalu terakhir dan diberi penanda
+            const articles = document.querySelectorAll('.page article');
+
+            articles.forEach((art, index) => {
+                if (index > 0) {
+                    mdContent += `\n---\n\n`;
+                }
+                if (art.closest('.thanks-page')) {
+                    mdContent += `${THANKS_MARKER}\n\n`;
+                }
+
+                art.childNodes.forEach(node => {
+                    if (node.nodeType === Node.ELEMENT_NODE) {
+                        const tag = node.tagName.toLowerCase();
+
+                        if (tag === 'h1') {
+                            mdContent += `# ${node.innerText.trim()}\n\n`;
+                        } else if (tag === 'h2') {
+                            mdContent += `## ${blockToParagraphs(node).join(' ')}\n\n`;
+                        } else if (tag === 'div' && node.classList.contains('meta')) {
+                            mdContent += `_${node.innerText.trim()}_\n\n`;
+                        } else if (tag === 'blockquote') {
+                            blockToParagraphs(node).forEach(t => { mdContent += `> ${t}\n\n`; });
+                        } else if (tag === 'p') {
+                            blockToParagraphs(node).forEach(t => { mdContent += `${t}\n\n`; });
+                        }
+                    }
+                });
+            });
+
+            return mdContent.trim();
+        }
+
+        function exportToMarkdown() {
+            const slug = getGeneratedSlug();
+            const blob = new Blob([buildMarkdown()], { type: 'text/markdown;charset=utf-8;' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `${slug}.md`;
+            a.click();
+            closeModal();
+        }
+
+        function triggerImportMD() {
+            document.getElementById('mdFileInput').click();
+        }
+
+        function handleFileImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                parseMarkdownToPages(text);
+            };
+            reader.readAsText(file);
+        }
+
+        // Tautan MD: [teks](alamat). Alamat berbahaya (mis. javascript:) tidak diubah jadi tautan.
+        const MD_LINK_RE = /(?<!!)\[([^\]]+)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
+
+        function safeUrl(u) {
+            u = (u || '').trim();
+            if (!u) return '';
+            const ok = /^(https?:|mailto:|tel:)/i.test(u) || /^[#/.]/.test(u) || !/^[^/?#]*:/.test(u);
+            if (!ok) return '';
+            return u.replace(/&/g, '&amp;').replace(/"/g, '%22').replace(/</g, '%3C').replace(/>/g, '%3E');
+        }
+
+        function mdEmphasis(t) {
+            return t.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\*(.*?)\*/g, '<i>$1</i>');
+        }
+
+        // Teks inline MD -> HTML (tebal, miring, tautan)
+        function mdInline(line) {
+            const links = [];
+            let t = line.replace(MD_LINK_RE, (m, text, url) => {
+                const u = safeUrl(url);
+                if (!u) return text;
+                links.push(`<a href="${u}" target="_blank" rel="noopener noreferrer">${mdEmphasis(text)}</a>`);
+                return `\u0000${links.length - 1}\u0000`;
+            });
+            t = mdEmphasis(t);
+            return t.replace(/\u0000(\d+)\u0000/g, (m, i) => links[Number(i)]);
+        }
+
+        // Mengurai satu halaman MD menjadi judul, baris di bawah judul, dan isi (HTML)
+        function parseMdPage(pageContent, index) {
+            const lines = pageContent.split('\n');
+            let htmlBuffer = '';
+            let title = `Halaman ${index + 1}`;
+            let meta = 'Oleh Penulis • 2026';
+            let hasTitle = false;
+            let metaSet = false;
+
+            lines.forEach(line => {
+                let trimmed = line.trim();
+                if (!trimmed) return;
+
+                let parsedLine = mdInline(line);
+
+                if (trimmed.startsWith('# ')) {
+                    title = trimmed.replace('# ', '');
+                    hasTitle = true;
+                } else if (trimmed.startsWith('## ')) {
+                    htmlBuffer += `<h2>${parsedLine.replace('## ', '')}</h2>`;
+                } else if (trimmed.startsWith('> ')) {
+                    htmlBuffer += `<blockquote>${parsedLine.replace('> ', '')}</blockquote>`;
+                } else if (trimmed.length > 2 && trimmed.startsWith('_') && trimmed.endsWith('_') && !metaSet && !htmlBuffer) {
+                    // Baris di bawah judul: _teks_ (sebelum isi artikel dimulai)
+                    meta = trimmed.slice(1, -1);
+                    metaSet = true;
+                } else {
+                    htmlBuffer += `<p>${parsedLine}</p>`;
+                }
+            });
+
+            return { title, meta, htmlBuffer };
+        }
+
+        // Regex penanda halaman terima kasih (satu baris sendiri)
+        const THANKS_MARKER_RE = /^[ \t]*<!--\s*terima\s*-?\s*kasih\s*-->[ \t]*$/im;
+
+        function parseMarkdownToPages(mdText) {
+            const rawPages = mdText.split(/\n(?:\s*-\s*){3,}\n/);
+
+            // Pisahkan halaman terima kasih (bertanda) dari halaman biasa
+            let thanksContent = null;
+            const normalPages = [];
+            rawPages.forEach(pc => {
+                if (THANKS_MARKER_RE.test(pc)) {
+                    thanksContent = pc.replace(THANKS_MARKER_RE, '');
+                } else {
+                    normalPages.push(pc);
+                }
+            });
+            if (normalPages.length === 0) normalPages.push('');
+
+            // Simpan halaman terima kasih agar tidak hilang saat container dikosongkan
+            const thanks = getThanksPage();
+            container.innerHTML = '';
+
+            normalPages.forEach((pageContent, index) => {
+                const { title, meta, htmlBuffer } = parseMdPage(pageContent, index);
+
+                const newPage = document.createElement('div');
+                newPage.className = 'page';
+                newPage.innerHTML = `
+                    <article>
+                        <h1 contenteditable="true" placeholder="Judul Artikel...">${title}</h1>
+                        <div class="meta" contenteditable="true" placeholder="Oleh Penulis...">${meta}</div>
+                        ${htmlBuffer || '<p contenteditable="true">Mulai mengetik...</p>'}
+                    </article>
+                `;
+
+                newPage.querySelectorAll('p, h2, blockquote').forEach(el => {
+                    el.setAttribute('contenteditable', 'true');
+                });
+
+                container.appendChild(newPage);
+            });
+
+            // Isi halaman terima kasih dari MD (jika ada penandanya); footer SVG dipertahankan
+            if (thanks && thanksContent !== null) {
+                const { title, meta, htmlBuffer } = parseMdPage(thanksContent, 0);
+                const art = thanks.querySelector('article');
+                const footer = art.querySelector('.thanks-footer');
+                Array.from(art.children).forEach(el => { if (el !== footer) el.remove(); });
+
+                const tpl = document.createElement('template');
+                tpl.innerHTML = `
+                    <h1 contenteditable="true" placeholder="Judul Penutup...">${title}</h1>
+                    <div class="meta" contenteditable="true" placeholder="Meta info...">${meta}</div>
+                    ${htmlBuffer || '<p placeholder="Ketik ucapan terima kasih..."></p>'}
+                `;
+                tpl.content.querySelectorAll('p, h2, blockquote').forEach(el => {
+                    el.setAttribute('contenteditable', 'true');
+                });
+                art.insertBefore(tpl.content, footer);
+            }
+
+            // Halaman terima kasih selalu dipasang kembali sebagai halaman terakhir
+            if (thanks) container.appendChild(thanks);
+
+            updateDots();
+            container.scrollTo({ left: 0, behavior: 'smooth' });
+            scheduleSave();
+            setTimeout(updateReadabilityMetrics, 300);
+        }
+
+        // ==========================================================================
+        // META TAGS (SEO + OPEN GRAPH) UNTUK THUMBNAIL SAAT DISHARE
+        // ==========================================================================
+        const PUBLISH_BASE_URL = 'https://hnf-nulis.github.io/ku/';
+
+        function cutText(text, max) {
+            const t = (text || '').replace(/\s+/g, ' ').trim();
+            if (t.length <= max) return t;
+            return t.slice(0, max - 3).trimEnd() + '...';
+        }
+
+        function applySeoMeta() {
+            const firstArticle = document.querySelector('article');
+            const h1 = firstArticle ? firstArticle.querySelector('h1') : null;
+            const firstP = firstArticle ? firstArticle.querySelector('p') : null;
+
+            const title = cutText(h1 ? h1.textContent : '', 60) || 'Artikel';
+            const description = cutText(firstP ? firstP.textContent : '', 160);
+            const slug = getGeneratedSlug() || 'artikel';
+            const pageUrl = PUBLISH_BASE_URL + slug + '.html';
+            const imageUrl = PUBLISH_BASE_URL + slug + '.png';
+
+            // Hapus meta hasil publish sebelumnya agar tidak dobel
+            document.head.querySelectorAll('[data-seo]').forEach(el => el.remove());
+
+            let titleEl = document.head.querySelector('title');
+            if (!titleEl) {
+                titleEl = document.createElement('title');
+                document.head.appendChild(titleEl);
+            }
+            titleEl.textContent = title;
+
+            const add = (attr, key, value) => {
+                const m = document.createElement('meta');
+                m.setAttribute(attr, key);
+                m.setAttribute('content', value);
+                m.setAttribute('data-seo', '1');
+                document.head.appendChild(m);
+            };
+
+            add('name', 'description', description);
+            add('property', 'og:type', 'website');
+            add('property', 'og:title', title);
+            add('property', 'og:description', description);
+            add('property', 'og:url', pageUrl);
+            add('property', 'og:image', imageUrl);
+        }
+
+        // ==========================================================================
+        // EXPORT HTML (PUBLISH VS EDIT)
+        // ==========================================================================
+        function confirmExport(type) {
+            ensureThanksLast();
+            const articles = document.querySelectorAll('article');
+            const slug = getGeneratedSlug();
+            const filename = type === 'publish' ? `${slug}.html` : `${slug}-edit.html`;
+
+            if (type === 'publish') {
+                applySeoMeta();
+                isPublished = true;
+                articles.forEach(art => {
+                    art.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+                    const rawHTML = art.innerHTML;
+                    const encoded = btoa(unescape(encodeURIComponent(rawHTML)));
+                    art.setAttribute('data-sec', encoded);
+                    art.innerHTML = `<div class="no-select" style="pointer-events: none;">${rawHTML}</div>`;
+                });
+                
+                document.body.classList.add('no-select');
+                editorTools.style.display = 'none';
+                btnTheme.style.display = 'inline-flex';
+                btnShare.style.display = 'inline-flex';
+                document.getElementById('readabilityPanel').style.display = 'none';
+            } else {
+                isPublished = false;
+                articles.forEach(art => {
+                    art.querySelectorAll('*').forEach(el => {
+                        // Footer halaman terima kasih (gambar, tulisan, QR) tidak dapat diedit
+                        if (el.closest('.thanks-footer')) return;
+                        if(['H1', 'P', 'DIV', 'H2', 'BLOCKQUOTE'].includes(el.tagName) && el.className !== 'meta') {
+                            el.setAttribute('contenteditable', 'true');
+                        }
+                    });
+                });
+                editorTools.style.display = 'flex';
+                btnTheme.style.display = '';
+                btnShare.style.display = '';
+                document.getElementById('readabilityPanel').style.display = 'flex';
+            }
+
+            document.getElementById('saveModal').remove();
+
+            // File yang disimpan selalu mulai dari tema terang; pembaca memilih sendiri
+            document.documentElement.removeAttribute('data-theme');
+            const htmlContent = document.documentElement.outerHTML;
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            a.click();
+
+            closeModal();
+            setTimeout(() => location.reload(), 1000);
+        }
+
+        // ==========================================================================
+        // PENYIMPANAN OTOMATIS DI BROWSER (localStorage, per alamat URL)
+        // ==========================================================================
+        const STORAGE_KEY = 'artikel-editor:' + location.origin + location.pathname;
+        let saveTimer = null;
+
+        function saveNow() {
+            // Versi Publish (terkunci) tidak disimpan
+            if (document.body.classList.contains('no-select')) return;
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    html: container.innerHTML,
+                    fontSize: currentFontSize
+                }));
+            } catch (e) {}
+        }
+
+        function scheduleSave() {
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(saveNow, 400);
+        }
+
+        function loadSaved() {
+            // Versi Publish (terkunci) selalu menampilkan isinya sendiri
+            if (document.body.classList.contains('no-select')) return;
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return;
+                const data = JSON.parse(raw);
+                if (data && data.html) container.innerHTML = data.html;
+                if (data && data.fontSize) updateFontSize(data.fontSize);
+            } catch (e) {}
+        }
+
+        // Kosongkan: sisakan satu halaman dengan judul dan isi kosong
+        // (meta penulis, halaman terima kasih, dan ukuran font tidak diubah).
+        function clearArticle() {
+            if (!confirm('Kosongkan judul dan isi artikel? Halaman tambahan akan dihapus dan tidak bisa dikembalikan.')) return;
+            clearTimeout(saveTimer);
+
+            const pages = Array.from(container.querySelectorAll('.page:not(.thanks-page)'));
+            pages.slice(1).forEach(pg => pg.remove());
+
+            const art = pages[0] ? pages[0].querySelector('article') : null;
+            if (art) {
+                const h1 = art.querySelector('h1');
+                if (h1) h1.textContent = '';
+
+                // Sisakan h1, meta, dan satu paragraf kosong
+                const meta = art.querySelector('.meta');
+                let firstP = art.querySelector('p');
+                Array.from(art.children).forEach(el => {
+                    if (el !== h1 && el !== meta && el !== firstP) el.remove();
+                });
+                if (!firstP) {
+                    firstP = document.createElement('p');
+                    art.appendChild(firstP);
+                }
+                firstP.textContent = '';
+                firstP.setAttribute('contenteditable', 'true');
+                firstP.setAttribute('placeholder', 'Mulai mengetik...');
+                if (h1) {
+                    h1.setAttribute('contenteditable', 'true');
+                    h1.setAttribute('placeholder', 'Judul Artikel...');
+                }
+            }
+
+            saveNow();
+            closeModal();
+            container.scrollTo({ left: 0, behavior: 'instant' });
+            updateDots();
+            resetLocalMetrics();
+            updateReadabilityMetrics();
+        }
+
+        container.addEventListener('input', scheduleSave);
+        window.addEventListener('pagehide', saveNow);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') saveNow();
+        });
+
+        // Initial trigger on load
+        window.onload = function() {
+            loadSaved();
+            ensureThanksLast();
+            updateDots();
+            updateReadabilityMetrics();
+            positionFooter();
+        };
+    </script>
+
+
+</body></html>
