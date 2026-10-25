@@ -1,0 +1,7 @@
+# Satu objek JSON per baris. Hanya "url" yang wajib. Baris paling bawah dianggap paling baru.
+# Field opsional: title, author, category, cover, date, description
+{"url":"judul-artikel-utama.html"}
+{"url":"fiksi/novel-contoh.html","cover":"cover/novel-contoh.jpg","date":"2026-09-15","category":"Fiksi"}
+{"url":"nonfiksi/panduan-menulis.html","author":"Hanif Priatama","date":"2026-10-01"}
+{"url":"puisi/kumpulan-puisi.html","cover":"cover/kumpulan-puisi.jpg","category":"Puisi","description":"Kumpulan puisi pendek tentang hari-hari biasa."}
+{"url":"esai/catatan-perjalanan.html","date":"2026-10-20"}

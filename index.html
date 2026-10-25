@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Katalog Buku</title>
+<meta name="description" content="Katalog buku: jelajahi, cari, dan baca.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="id_ID">
+<meta property="og:title" content="Katalog Buku">
+<meta property="og:description" content="Katalog buku: jelajahi, cari, dan baca.">
+<meta property="og:url" content="https://hnf-nulis.github.io/ku/">
+<meta property="og:image" content="https://hnf-nulis.github.io/ku/index.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://hnf-nulis.github.io/ku/index.jpg">
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #FBF8F3;
+    --surface: #FFFFFF;
+    --text: #2D3748;
+    --heading: #1A202C;
+    --muted: #6B7280;
+    --border: rgba(0,0,0,.12);
+    --shadow: rgba(0,0,0,.28);
+    --accent: #2B6CB0;
+    --accent-text: #FFFFFF;
+    --chip-bg: #FFFFFF;
+    --overlay: rgba(0,0,0,.55);
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #121212;
+    --surface: #1E1E22;
+    --text: #E2E8F0;
+    --heading: #F7FAFC;
+    --muted: #A0AEC0;
+    --border: rgba(255,255,255,.14);
+    --shadow: rgba(0,0,0,.7);
+    --accent: #63B3ED;
+    --accent-text: #0B1220;
+    --chip-bg: #2A2A2E;
+    --overlay: rgba(0,0,0,.7);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.5;
+    -webkit-tap-highlight-color: transparent;
+  }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button, select, input { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 20px 16px 48px; }
+
+  header.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+  h1 { font-size: 1.5rem; color: var(--heading); letter-spacing: -.3px; }
+
+  .btn {
+    min-height: 40px; min-width: 40px; padding: 0 14px;
+    border: 1px solid var(--border); border-radius: 10px;
+    background: var(--chip-bg); display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .btn[aria-pressed="true"] { background: var(--heading); color: var(--bg); border-color: var(--heading); }
+  .btn.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 600; text-decoration: none; }
+
+  .tools { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .field { display: flex; flex-direction: column; }
+  .field.grow { flex: 1 1 220px; }
+  .field label, .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .field input, .field select {
+    min-height: 40px; padding: 0 12px; width: 100%;
+    border: 1px solid var(--border); border-radius: 10px; background: var(--chip-bg);
+  }
+  .views { display: flex; gap: 6px; }
+
+  #chips {
+    display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 10px; margin-bottom: 4px;
+    scrollbar-width: thin; -webkit-overflow-scrolling: touch;
+  }
+  .chip {
+    flex: 0 0 auto; min-height: 40px; padding: 0 14px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--chip-bg); white-space: nowrap;
+  }
+  .chip[aria-pressed="true"] { background: var(--heading); color: var(--bg); border-color: var(--heading); }
+
+  #count { font-size: .85rem; color: var(--muted); margin: 6px 0 14px; min-height: 1.3em; }
+
+  /* ===== Grid sampul ===== */
+  #grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px 12px; }
+  @media (min-width: 640px)  { #grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px 16px; } }
+  @media (min-width: 960px)  { #grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+  @media (min-width: 1200px) { #grid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+
+  .book {
+    display: block; width: 100%; text-align: left; background: none; border: 0; padding: 0;
+    color: inherit; border-radius: 8px;
+  }
+  .cover {
+    position: relative; aspect-ratio: 2 / 3; overflow: hidden;
+    border-radius: 3px 8px 8px 3px; background: #CBD5E0;
+    box-shadow: 0 2px 8px var(--shadow), inset 5px 0 6px -3px rgba(0,0,0,.35);
+    transition: transform .2s ease;
+  }
+  .cover::after { /* garis punggung buku */
+    content: ""; position: absolute; inset: 0 auto 0 0; width: 6px; pointer-events: none;
+    background: linear-gradient(90deg, rgba(0,0,0,.28), rgba(255,255,255,.12) 60%, transparent);
+  }
+  .cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cover.fallback {
+    display: flex; align-items: center; justify-content: center; padding: 12px 10px 12px 16px;
+    text-align: center; font-weight: 700; color: #fff; font-size: .9rem; line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+  @media (hover: hover) { .book:hover .cover { transform: translateY(-4px) scale(1.02); } }
+
+  .info { padding-top: 8px; }
+  .book h3 {
+    font-size: .8125rem; line-height: 1.3; color: var(--heading); font-weight: 600;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .book .author, .book .pages { display: block; font-size: .75rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .book .desc { display: none; }
+
+  /* ===== Tampilan daftar ===== */
+  #grid.list { display: flex; flex-direction: column; gap: 14px; }
+  #grid.list .book { display: grid; grid-template-columns: 72px 1fr; gap: 14px; align-items: start; }
+  #grid.list .info { padding-top: 2px; }
+  #grid.list .book h3 { font-size: 1rem; -webkit-line-clamp: 2; }
+  #grid.list .book .author, #grid.list .book .pages { font-size: .8125rem; }
+  #grid.list .book .desc {
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    font-size: .8125rem; color: var(--muted); margin-top: 4px;
+  }
+
+  /* ===== Status ===== */
+  .state { text-align: center; padding: 56px 16px; color: var(--muted); }
+  .state p { margin-bottom: 14px; }
+
+  /* ===== Panel detail ===== */
+  #overlay {
+    position: fixed; inset: 0; z-index: 50; background: var(--overlay);
+    display: none; align-items: flex-end; justify-content: center;
+  }
+  #overlay.open { display: flex; }
+  .sheet {
+    background: var(--surface); width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto;
+    border-radius: 16px 16px 0 0; padding: 20px 16px 24px; position: relative;
+  }
+  @media (min-width: 640px) {
+    #overlay { align-items: center; }
+    .sheet { border-radius: 16px; }
+  }
+  .sheet .close { position: absolute; top: 10px; right: 10px; }
+  .detail { display: grid; grid-template-columns: 120px 1fr; gap: 16px; margin-top: 8px; }
+  @media (min-width: 640px) { .detail { grid-template-columns: 160px 1fr; } }
+  .detail h2 { font-size: 1.15rem; line-height: 1.25; color: var(--heading); padding-right: 36px; }
+  .detail .meta { list-style: none; margin: 8px 0 0; font-size: .85rem; color: var(--muted); }
+  .detail .meta li { margin-bottom: 2px; }
+  .sheet .about { margin: 16px 0; font-size: .95rem; white-space: pre-line; }
+  .sheet .actions { display: flex; }
+  .sheet .actions .btn { flex: 1; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Katalog Buku</h1>
+    <button class="btn" id="btnTheme" type="button" aria-pressed="false" aria-label="Ganti tema terang atau gelap" title="Ganti tema">🌙</button>
+  </header>
+
+  <div class="tools">
+    <div class="field grow">
+      <label for="search">Cari buku</label>
+      <input id="search" type="search" placeholder="Cari judul, penulis, kategori…" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="sort">Urutkan</label>
+      <select id="sort">
+        <option value="terbaru">Terbaru</option>
+        <option value="terlama">Terlama</option>
+        <option value="az">Judul A-Z</option>
+        <option value="za">Judul Z-A</option>
+        <option value="penulis">Penulis</option>
+        <option value="kategori">Kategori</option>
+      </select>
+    </div>
+    <div class="views" role="group" aria-label="Tampilan">
+      <button class="btn" id="viewGrid" type="button" aria-pressed="true">Grid</button>
+      <button class="btn" id="viewList" type="button" aria-pressed="false">Daftar</button>
+    </div>
+  </div>
+
+  <div id="chips" role="group" aria-label="Kategori"></div>
+  <p id="count" aria-live="polite"></p>
+  <main id="grid" aria-busy="true"></main>
+</div>
+
+<div id="overlay" aria-hidden="true">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="dTitle">
+    <button class="btn close" id="dClose" type="button" aria-label="Tutup">✕</button>
+    <div class="detail">
+      <div id="dCover"></div>
+      <div>
+        <h2 id="dTitle"></h2>
+        <ul class="meta" id="dMeta"></ul>
+      </div>
+    </div>
+    <p class="about" id="dAbout"></p>
+    <div class="actions"><a class="btn primary" id="dRead" href="#">Baca</a></div>
+  </div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  // ---------- Konfigurasi ----------
+  const CATALOG_FILE = "catalog.jsonl";
+  const ALL = "Semua";
+  const DEFAULT_CAT = "Lainnya";
+
+  // ---------- Elemen ----------
+  const $ = id => document.getElementById(id);
+  const grid = $("grid"), chipsBox = $("chips"), countEl = $("count");
+  const searchBox = $("search"), sortBox = $("sort");
+  const btnGrid = $("viewGrid"), btnList = $("viewList"), btnTheme = $("btnTheme");
+  const overlay = $("overlay");
+
+  // ---------- Penyimpanan aman ----------
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  };
+
+  // ---------- Status ----------
+  let items = [];
+  const state = { cat: ALL, q: "", sort: "terbaru" };
+  let view = store.get("katalog-tampilan") === "list" ? "list" : "grid";
+  const SORT_KEYS = ["terbaru", "terlama", "az", "za", "penulis", "kategori"];
+  state.sort = SORT_KEYS.includes(store.get("katalog-urut")) ? store.get("katalog-urut") : "terbaru";
+
+  // ---------- Utilitas ----------
+  // Hanya izinkan http/https (tolak javascript:, data:, dll). URL relatif dijadikan absolut.
+  function safeUrl(raw, base) {
+    if (!raw) return "";
+    try {
+      const u = new URL(String(raw).trim(), base || location.href);
+      return /^https?:$/.test(u.protocol) ? u.href : "";
+    } catch (e) { return ""; }
+  }
+
+  const str = v => (v == null ? "" : String(v)).trim();
+
+  function hue(s) {
+    let h = 0;
+    for (const c of s) h = (h * 31 + c.charCodeAt(0)) % 360;
+    return h;
+  }
+
+  function fmtDate(d) {
+    const t = Date.parse(d);
+    if (!t) return "";
+    return new Date(t).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+  }
+
+  // ---------- JSONL ----------
+  // Satu objek per baris; baris kosong, berawalan #, atau rusak dilewati.
+  function parseJsonl(text) {
+    const out = [];
+    text.split(/\r?\n/).forEach(line => {
+      const l = line.trim();
+      if (!l || l.startsWith("#")) return;
+      try {
+        const o = JSON.parse(l);
+        if (o && typeof o === "object" && o.url) out.push({ ...o, idx: out.length });
+      } catch (e) { /* lewati baris rusak */ }
+    });
+    return out;
+  }
+
+  // ---------- Metadata dari halaman buku ----------
+  // Nilai di JSONL diprioritaskan; sisanya dibaca dari <head> halaman.
+  async function loadMeta(entry) {
+    const href = safeUrl(entry.url);
+    if (!href) return null;
+
+    const base = new URL("./", location.href).href;
+    const rel = href.startsWith(base) ? href.slice(base.length) : "";
+    const folder = rel.includes("/") ? decodeURIComponent(rel.split("/")[0]) : "";
+
+    const result = {
+      idx: entry.idx,
+      href,
+      title: str(entry.title) || decodeURIComponent(href.split("/").pop().replace(/\.html?$/i, "")) || href,
+      description: str(entry.description),
+      author: str(entry.author),
+      cover: safeUrl(entry.cover, href),
+      date: str(entry.date),
+      category: str(entry.category) || folder || DEFAULT_CAT,
+      pages: 0
+    };
+
+    try {
+      const res = await fetch(href, { cache: "no-cache" });
+      if (!res.ok) throw new Error(res.status);
+      const doc = new DOMParser().parseFromString(await res.text(), "text/html");
+      const meta = sel => str(doc.querySelector(sel)?.getAttribute("content"));
+
+      result.title = str(entry.title) || str(doc.querySelector("title")?.textContent) || meta('meta[property="og:title"]') || result.title;
+      result.description = str(entry.description) || meta('meta[name="description"]') || meta('meta[property="og:description"]');
+      result.author = str(entry.author) || meta('meta[name="author"]');
+      result.cover = safeUrl(entry.cover, href) || safeUrl(meta('meta[name="cover"]'), href) || safeUrl(meta('meta[property="og:image"]'), href);
+      result.date = str(entry.date) || meta('meta[property="article:published_time"]') || meta('meta[name="date"]');
+      result.category = str(entry.category) || meta('meta[name="category"]') || meta('meta[property="article:section"]') || folder || DEFAULT_CAT;
+      result.pages = doc.querySelectorAll(".page").length;
+    } catch (e) { /* gagal (404/CORS): pakai nilai cadangan */ }
+
+    return result;
+  }
+
+  // ---------- Pembuat elemen ----------
+  function makeCover(it) {
+    const box = document.createElement("div");
+    box.className = "cover";
+    const fallback = () => {
+      box.className = "cover fallback";
+      box.style.background = `hsl(${hue(it.title)} 45% 38%)`;
+      box.textContent = it.title;
+    };
+    if (it.cover) {
+      const img = new Image();
+      img.alt = "";
+      img.loading = "lazy";
+      img.decoding = "async";
+      img.onerror = () => { box.textContent = ""; fallback(); };
+      img.src = it.cover;
+      box.appendChild(img);
+    } else fallback();
+    return box;
+  }
+
+  function makeCard(it) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "book";
+    b.setAttribute("aria-label", it.title + (it.author ? ", oleh " + it.author : ""));
+
+    const info = document.createElement("div");
+    info.className = "info";
+    const h3 = document.createElement("h3");
+    h3.textContent = it.title;
+    info.appendChild(h3);
+
+    if (it.author) {
+      const a = document.createElement("span");
+      a.className = "author";
+      a.textContent = it.author;
+      info.appendChild(a);
+    }
+    if (it.pages > 0) {
+      const p = document.createElement("span");
+      p.className = "pages";
+      p.textContent = it.pages + " halaman";
+      info.appendChild(p);
+    }
+    if (it.description) {
+      const d = document.createElement("p");
+      d.className = "desc";
+      d.textContent = it.description;
+      info.appendChild(d);
+    }
+
+    b.append(makeCover(it), info);
+    b.addEventListener("click", () => openDetail(it, b));
+    return b;
+  }
+
+  // ---------- Render ----------
+  function render(list) {
+    grid.textContent = "";
+    grid.setAttribute("aria-busy", "false");
+    grid.classList.toggle("list", view === "list");
+
+    if (!list.length) {
+      const s = document.createElement("div");
+      s.className = "state";
+      const p = document.createElement("p");
+      p.textContent = items.length ? "Tidak ada buku yang cocok dengan pencarian ini." : "Katalog masih kosong.";
+      s.appendChild(p);
+      if (items.length) {
+        const r = document.createElement("button");
+        r.type = "button"; r.className = "btn"; r.textContent = "Reset filter";
+        r.addEventListener("click", resetFilters);
+        s.appendChild(r);
+      }
+      grid.appendChild(s);
+      return;
+    }
+    const frag = document.createDocumentFragment();
+    list.forEach(it => frag.appendChild(makeCard(it)));
+    grid.appendChild(frag);
+  }
+
+  function renderChips() {
+    const counts = new Map();
+    items.forEach(i => counts.set(i.category, (counts.get(i.category) || 0) + 1));
+    const cats = [...counts.keys()].sort((a, b) => a.localeCompare(b, "id"));
+    chipsBox.textContent = "";
+    [ALL, ...cats].forEach(c => {
+      const n = c === ALL ? items.length : counts.get(c);
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip";
+      b.textContent = `${c} (${n})`;
+      b.setAttribute("aria-pressed", String(c === state.cat));
+      b.addEventListener("click", () => { state.cat = c; refresh(true); });
+      chipsBox.appendChild(b);
+    });
+  }
+
+  // ---------- Filter & urutan ----------
+  const ts = i => Date.parse(i.date) || 0;
+  const cmp = (a, b) => a.localeCompare(b, "id");
+  const SORTERS = {
+    terbaru:  (a, b) => ts(b) - ts(a) || b.idx - a.idx,
+    terlama:  (a, b) => ts(a) - ts(b) || a.idx - b.idx,
+    az:       (a, b) => cmp(a.title, b.title),
+    za:       (a, b) => cmp(b.title, a.title),
+    penulis:  (a, b) => (a.author ? 0 : 1) - (b.author ? 0 : 1) || cmp(a.author, b.author) || cmp(a.title, b.title),
+    kategori: (a, b) => cmp(a.category, b.category) || cmp(a.title, b.title)
+  };
+
+  function applyFilter() {
+    const q = state.q.toLowerCase();
+    const list = items
+      .filter(i => (state.cat === ALL || i.category === state.cat) &&
+        (!q || [i.title, i.author, i.category, i.description].join(" ").toLowerCase().includes(q)))
+      .sort(SORTERS[state.sort] || SORTERS.terbaru);
+    countEl.textContent = `Menampilkan ${list.length} dari ${items.length} buku`;
+    render(list);
+  }
+
+  // Sinkronkan kontrol, chip, daftar, dan (opsional) hash URL.
+  function refresh(pushHash) {
+    searchBox.value = state.q;
+    sortBox.value = state.sort;
+    store.set("katalog-urut", state.sort);
+    renderChips();
+    applyFilter();
+    if (pushHash) writeHash(true);
+  }
+
+  function resetFilters() {
+    state.cat = ALL; state.q = "";
+    refresh(true);
+  }
+
+  // ---------- Hash URL: #kategori=Fiksi&q=...&urut=az ----------
+  function writeHash(push) {
+    const p = new URLSearchParams();
+    if (state.cat !== ALL) p.set("kategori", state.cat);
+    if (state.q) p.set("q", state.q);
+    p.set("urut", state.sort);
+    const h = "#" + p.toString();
+    if (h === location.hash) return;
+    if (push) location.hash = h;
+    else history.replaceState(null, "", h);
+  }
+
+  function readHash() {
+    const p = new URLSearchParams(location.hash.slice(1));
+    if (p.has("kategori") || p.has("q") || p.has("urut")) {
+      state.cat = p.get("kategori") || ALL;
+      state.q = p.get("q") || "";
+      if (SORT_KEYS.includes(p.get("urut"))) state.sort = p.get("urut");
+    }
+    // Kategori yang tidak ada di data kembali ke "Semua"
+    if (items.length && state.cat !== ALL && !items.some(i => i.category === state.cat)) state.cat = ALL;
+  }
+
+  window.addEventListener("hashchange", () => { readHash(); refresh(false); });
+
+  // ---------- Panel detail ----------
+  let lastFocus = null;
+
+  function openDetail(it, trigger) {
+    lastFocus = trigger || document.activeElement;
+    $("dCover").textContent = "";
+    $("dCover").appendChild(makeCover(it));
+    $("dTitle").textContent = it.title;
+
+    const meta = $("dMeta");
+    meta.textContent = "";
+    [
+      it.author && "Penulis: " + it.author,
+      "Kategori: " + it.category,
+      fmtDate(it.date) && "Terbit: " + fmtDate(it.date),
+      it.pages > 0 && it.pages + " halaman"
+    ].filter(Boolean).forEach(t => {
+      const li = document.createElement("li");
+      li.textContent = t;
+      meta.appendChild(li);
+    });
+
+    $("dAbout").textContent = it.description || "";
+    $("dAbout").style.display = it.description ? "" : "none";
+    $("dRead").href = it.href;
+
+    overlay.classList.add("open");
+    overlay.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+    $("dClose").focus();
+  }
+
+  function closeDetail() {
+    overlay.classList.remove("open");
+    overlay.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+    if (lastFocus && document.contains(lastFocus)) lastFocus.focus();
+  }
+
+  $("dClose").addEventListener("click", closeDetail);
+  overlay.addEventListener("click", e => { if (e.target === overlay) closeDetail(); });
+  document.addEventListener("keydown", e => {
+    if (!overlay.classList.contains("open")) return;
+    if (e.key === "Escape") { closeDetail(); return; }
+    if (e.key === "Tab") { // jaga fokus tetap di dalam dialog
+      const f = [...overlay.querySelectorAll("button, a[href]")].filter(x => x.offsetParent !== null);
+      if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  });
+
+  // ---------- Tampilan Grid / Daftar ----------
+  function setView(v) {
+    view = v;
+    store.set("katalog-tampilan", v);
+    btnGrid.setAttribute("aria-pressed", String(v === "grid"));
+    btnList.setAttribute("aria-pressed", String(v === "list"));
+    grid.classList.toggle("list", v === "list");
+  }
+  btnGrid.addEventListener("click", () => setView("grid"));
+  btnList.addEventListener("click", () => setView("list"));
+
+  // ---------- Tema ----------
+  function applyTheme(t, save) {
+    const dark = t === "dark";
+    document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+    btnTheme.textContent = dark ? "☀️" : "🌙";
+    btnTheme.setAttribute("aria-pressed", String(dark));
+    btnTheme.title = dark ? "Mode terang" : "Mode gelap";
+    if (save) store.set("katalog-tema", t);
+  }
+  btnTheme.addEventListener("click", () => {
+    applyTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark", true);
+  });
+  (function initTheme() {
+    let t = store.get("katalog-tema");
+    if (t !== "dark" && t !== "light") {
+      t = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    applyTheme(t, false);
+  })();
+
+  // ---------- Kontrol cari & urut ----------
+  let qTimer = null;
+  searchBox.addEventListener("input", () => {
+    state.q = searchBox.value;
+    clearTimeout(qTimer);
+    qTimer = setTimeout(() => { applyFilter(); writeHash(false); }, 150); // replaceState: tidak menumpuk riwayat
+  });
+  sortBox.addEventListener("change", () => { state.sort = sortBox.value; refresh(true); });
+
+  // ---------- Mulai ----------
+  async function init() {
+    setView(view);
+    sortBox.value = state.sort;
+
+    const loading = document.createElement("div");
+    loading.className = "state";
+    loading.textContent = "Memuat katalog…";
+    grid.appendChild(loading);
+
+    try {
+      const res = await fetch(CATALOG_FILE, { cache: "no-store" });
+      if (!res.ok) throw new Error(res.status);
+      const entries = parseJsonl(await res.text());
+      const loaded = await Promise.all(entries.map(loadMeta));
+      items = loaded.filter(Boolean);
+    } catch (e) {
+      grid.textContent = "";
+      const s = document.createElement("div");
+      s.className = "state";
+      s.textContent = "Gagal memuat " + CATALOG_FILE + ". Pastikan file ada dan halaman dibuka lewat server (bukan file://).";
+      grid.appendChild(s);
+      grid.setAttribute("aria-busy", "false");
+      return;
+    }
+
+    readHash();
+    refresh(false);
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
