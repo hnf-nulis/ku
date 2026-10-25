@@ -222,6 +222,7 @@
 
   // ---------- Konfigurasi ----------
   const CATALOG_FILE = "catalog.jsonl";
+  const ARTICLE_DIR = "artikel/";   // folder artikel; sampul otomatis di artikel/cover/slug.jpg
   const ALL = "Semua";
   const DEFAULT_CAT = "Lainnya";
 
@@ -286,21 +287,35 @@
 
   // ---------- Metadata dari halaman buku ----------
   // Nilai di JSONL diprioritaskan; sisanya dibaca dari <head> halaman.
+  // "nama-artikel" atau "nama-artikel.html" (tanpa folder) dianggap ada di folder artikel.
+  function resolveUrl(raw) {
+    let u = str(raw);
+    if (!u) return "";
+    const isAbs = /^[a-z][a-z0-9+.-]*:/i.test(u);
+    if (!isAbs && !u.includes("/")) u = ARTICLE_DIR + u;
+    if (!/\.[a-z0-9]+$/i.test(u.split("/").pop())) u += ".html";
+    return safeUrl(u);
+  }
+
   async function loadMeta(entry) {
-    const href = safeUrl(entry.url);
+    const href = resolveUrl(entry.url);
     if (!href) return null;
 
-    const base = new URL("./", location.href).href;
-    const rel = href.startsWith(base) ? href.slice(base.length) : "";
+    const slug = decodeURIComponent(href.split("/").pop().replace(/\.html?$/i, ""));
+    // Kategori dari subfolder di dalam folder artikel (artikel/fiksi/x.html -> "fiksi")
+    const artBase = new URL(ARTICLE_DIR, location.href).href;
+    const rel = href.startsWith(artBase) ? href.slice(artBase.length) : "";
     const folder = rel.includes("/") ? decodeURIComponent(rel.split("/")[0]) : "";
+    // Sampul menurut konvensi: artikel/cover/slug.jpg
+    const conventionCover = safeUrl(ARTICLE_DIR + "cover/" + encodeURIComponent(slug) + ".jpg");
 
     const result = {
       idx: entry.idx,
       href,
-      title: str(entry.title) || decodeURIComponent(href.split("/").pop().replace(/\.html?$/i, "")) || href,
+      title: str(entry.title) || slug || href,
       description: str(entry.description),
       author: str(entry.author),
-      cover: safeUrl(entry.cover, href),
+      covers: [safeUrl(entry.cover, href), conventionCover].filter(Boolean),
       date: str(entry.date),
       category: str(entry.category) || folder || DEFAULT_CAT,
       pages: 0
@@ -315,7 +330,10 @@
       result.title = str(entry.title) || str(doc.querySelector("title")?.textContent) || meta('meta[property="og:title"]') || result.title;
       result.description = str(entry.description) || meta('meta[name="description"]') || meta('meta[property="og:description"]');
       result.author = str(entry.author) || meta('meta[name="author"]');
-      result.cover = safeUrl(entry.cover, href) || safeUrl(meta('meta[name="cover"]'), href) || safeUrl(meta('meta[property="og:image"]'), href);
+      // Urutan sampul: JSONL -> meta cover -> artikel/cover/slug.jpg -> kotak berwarna
+      // (og:image sengaja tidak dipakai: bentuknya lanskap dan akan terpotong)
+      result.covers = [safeUrl(entry.cover, href), safeUrl(meta('meta[name="cover"]'), href), conventionCover]
+        .filter((u, i, a) => u && a.indexOf(u) === i);
       result.date = str(entry.date) || meta('meta[property="article:published_time"]') || meta('meta[name="date"]');
       result.category = str(entry.category) || meta('meta[name="category"]') || meta('meta[property="article:section"]') || folder || DEFAULT_CAT;
       result.pages = doc.querySelectorAll(".page").length;
@@ -333,15 +351,18 @@
       box.style.background = `hsl(${hue(it.title)} 45% 38%)`;
       box.textContent = it.title;
     };
-    if (it.cover) {
+    // Coba sampul satu per satu; jika semua gagal, pakai kotak berwarna.
+    const tryCover = n => {
+      if (n >= it.covers.length) { box.textContent = ""; fallback(); return; }
       const img = new Image();
       img.alt = "";
       img.loading = "lazy";
       img.decoding = "async";
-      img.onerror = () => { box.textContent = ""; fallback(); };
-      img.src = it.cover;
+      img.onerror = () => { img.remove(); tryCover(n + 1); };
+      img.src = it.covers[n];
       box.appendChild(img);
-    } else fallback();
+    };
+    if (it.covers.length) tryCover(0); else fallback();
     return box;
   }
 
