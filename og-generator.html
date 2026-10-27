@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pembuat Gambar OG</title>
+<style>
+  :root{
+    --bg:#f6f5f2; --card:#ffffff; --ink:#1d1d1b; --muted:#6b6a66; --line:#e2e0da;
+    --accent:#2f5bea; --accent-ink:#fff; --ok:#1d7a46; --warn:#b4540a;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--bg:#161615;--card:#201f1e;--ink:#f1efe9;--muted:#9c9a93;--line:#34332f;--accent:#6c8cff;--accent-ink:#0d1330;--ok:#5fcf8e;--warn:#f0a35c}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  main{max-width:760px;margin:0 auto;padding:32px 16px 64px}
+  h1{font-size:1.5rem;margin:0 0 4px}
+  p.sub{margin:0 0 24px;color:var(--muted)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+  .drop{display:block;border:2px dashed var(--line);border-radius:12px;padding:36px 16px;text-align:center;cursor:pointer;transition:.15s}
+  .drop:hover,.drop.over{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 6%,transparent)}
+  .drop strong{display:block;font-size:1.05rem}
+  .drop span{color:var(--muted);font-size:.9rem}
+  .drop input{display:none}
+  .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:16px}
+  .row label{font-size:.9rem;color:var(--muted)}
+  input[type=number]{width:90px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+  #status{margin-top:16px;font-size:.92rem;color:var(--muted);min-height:1.4em}
+  #status.err{color:var(--warn)}
+  #result{display:none;margin-top:20px}
+  #result h2{font-size:1rem;margin:0 0 10px}
+  #result h2.second{margin-top:32px;padding-top:24px;border-top:1px solid var(--line)}
+  #previewP{display:block;width:100%;max-width:320px;height:auto;border-radius:10px;border:1px solid var(--line);background:#888}
+  #preview{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--line);background:#888}
+  .meta{display:flex;gap:8px 20px;flex-wrap:wrap;margin:14px 0;font-size:.92rem;color:var(--muted)}
+  .meta b{color:var(--ink);font-weight:600}
+  .ok{color:var(--ok)!important}
+  .warn{color:var(--warn)!important}
+  a.btn{display:inline-block;background:var(--accent);color:var(--accent-ink);padding:11px 20px;border-radius:10px;text-decoration:none;font-weight:600}
+  a.btn:hover{filter:brightness(1.08)}
+  footer{margin-top:20px;font-size:.82rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+  <h1>Pembuat Gambar OG</h1>
+  <p class="sub">Unggah JPG potret (2:3). Hasilnya PNG landscape 1200×630: gambar potret di tengah, di atas latar blur dari gambar yang sama.</p>
+
+  <div class="card">
+    <label class="drop" id="drop">
+      <strong>Klik atau seret file JPG ke sini</strong>
+      <span>Diproses di browser, tidak ada yang diunggah ke server</span>
+      <input type="file" id="file" accept="image/jpeg,.jpg,.jpeg">
+    </label>
+    <div class="row">
+      <label for="limit">Batas PNG landscape (KB)</label>
+      <input type="number" id="limit" value="300" min="50" max="2000" step="10">
+      <label for="limitP">Batas JPG potret (KB)</label>
+      <input type="number" id="limitP" value="100" min="20" max="1000" step="10">
+    </div>
+    <div id="status" role="status" aria-live="polite"></div>
+
+    <div id="result">
+      <h2>1. Landscape OG (PNG)</h2>
+      <img id="preview" alt="Hasil gambar OG">
+      <div class="meta" id="meta"></div>
+      <a class="btn" id="download" download="og.png">Unduh PNG</a>
+
+      <h2 class="second">2. Potret (JPG)</h2>
+      <img id="previewP" alt="Hasil gambar potret">
+      <div class="meta" id="metaP"></div>
+      <a class="btn" id="downloadP" download="potret.jpg">Unduh JPG</a>
+    </div>
+  </div>
+  <footer>Ukuran file dikecilkan dengan mengurangi jumlah warna (PNG berpalet). Bila masih terlalu besar, resolusi diturunkan sedikit demi sedikit.</footer>
+</main>
+
+<script>
+const W0 = 1200, H0 = 630;
+const $ = id => document.getElementById(id);
+let currentImg = null, currentName = 'gambar', outURL = null, busy = false;
+
+function setStatus(msg, err){ const s=$('status'); s.textContent=msg||''; s.className=err?'err':''; }
+const tick = () => new Promise(r => setTimeout(r, 0));
+
+async function loadImage(file){
+  if (window.createImageBitmap){
+    try { return await createImageBitmap(file, {imageOrientation:'from-image'}); } catch(e){}
+  }
+  return new Promise((res, rej) => {
+    const u = URL.createObjectURL(file), i = new Image();
+    i.onload = () => res(i); i.onerror = rej; i.src = u;
+  });
+}
+const dimsOf = im => [im.naturalWidth || im.width, im.naturalHeight || im.height];
+
+/* ---------- Komposisi kanvas ---------- */
+function compose(img, W, H){
+  const [iw, ih] = dimsOf(img);
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const ctx = c.getContext('2d', {willReadFrequently:true});
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+
+  // Latar blur: potong "cover" lalu kecilkan bertahap, lalu besarkan bertahap
+  const cover = Math.max(W/iw, H/ih);
+  const sw = W/cover, sh = H/cover, sx = (iw-sw)/2, sy = (ih-sh)/2;
+  const mk = d => { const k = document.createElement('canvas'); k.width = Math.max(2,Math.round(W/d)); k.height = Math.max(2,Math.round(H/d)); const x = k.getContext('2d'); x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high'; return k; };
+  let prev = null;
+  for (const d of [4, 8, 16, 32]){
+    const k = mk(d), x = k.getContext('2d');
+    if (!prev) x.drawImage(img, sx, sy, sw, sh, 0, 0, k.width, k.height);
+    else x.drawImage(prev, 0, 0, k.width, k.height);
+    prev = k;
+  }
+  for (const d of [16, 8, 4, 2]){
+    const k = mk(d); k.getContext('2d').drawImage(prev, 0, 0, k.width, k.height); prev = k;
+  }
+  ctx.drawImage(prev, 0, 0, W, H);
+  ctx.fillStyle = 'rgba(0,0,0,0.16)'; ctx.fillRect(0, 0, W, H);
+
+  // Gambar potret: tinggi sama dengan kanvas, di tengah
+  const s = Math.min(H/ih, W/iw);
+  const fw = Math.round(iw*s), fh = Math.round(ih*s);
+  const fx = Math.round((W-fw)/2), fy = Math.round((H-fh)/2);
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = H*0.05;
+  ctx.drawImage(img, fx, fy, fw, fh);
+  ctx.restore();
+  return c;
+}
+
+/* ---------- Kuantisasi warna (median cut) ---------- */
+function buildPalette(data, n){
+  const cnt = new Uint32Array(32768), sr = new Uint32Array(32768), sg = new Uint32Array(32768), sb = new Uint32Array(32768);
+  for (let i = 0; i < data.length; i += 4){
+    const r = data[i], g = data[i+1], b = data[i+2];
+    const k = ((r>>3)<<10) | ((g>>3)<<5) | (b>>3);
+    cnt[k]++; sr[k] += r; sg[k] += g; sb[k] += b;
+  }
+  const bins = []; let total = 0;
+  for (let k = 0; k < 32768; k++) if (cnt[k]){ bins.push(k); total += cnt[k]; }
+  let boxes = [{bins, pop: total}];
+  while (boxes.length < n){
+    let bi = -1, bp = 0;
+    for (let i = 0; i < boxes.length; i++) if (boxes[i].bins.length > 1 && boxes[i].pop > bp){ bp = boxes[i].pop; bi = i; }
+    if (bi < 0) break;
+    const b = boxes[bi];
+    let rmin=31,rmax=0,gmin=31,gmax=0,bmin=31,bmax=0;
+    for (const k of b.bins){
+      const r = k>>10, g = (k>>5)&31, bl = k&31;
+      if (r<rmin) rmin=r; if (r>rmax) rmax=r;
+      if (g<gmin) gmin=g; if (g>gmax) gmax=g;
+      if (bl<bmin) bmin=bl; if (bl>bmax) bmax=bl;
+    }
+    const rr = rmax-rmin, gr = gmax-gmin, br = bmax-bmin;
+    const ch = (rr>=gr && rr>=br) ? 0 : (gr>=br ? 1 : 2);
+    const key = ch===0 ? (k=>k>>10) : ch===1 ? (k=>(k>>5)&31) : (k=>k&31);
+    b.bins.sort((a,c) => key(a)-key(c));
+    const half = b.pop/2; let acc = 0, idx = 0;
+    for (; idx < b.bins.length-1; idx++){ acc += cnt[b.bins[idx]]; if (acc >= half) break; }
+    idx = Math.min(idx, b.bins.length-2);
+    const a = b.bins.slice(0, idx+1), c = b.bins.slice(idx+1);
+    let pa = 0; for (const k of a) pa += cnt[k];
+    boxes.splice(bi, 1, {bins:a, pop:pa}, {bins:c, pop:b.pop-pa});
+  }
+  const cols = boxes.map(b => {
+    let c=0,r=0,g=0,bl=0;
+    for (const k of b.bins){ c+=cnt[k]; r+=sr[k]; g+=sg[k]; bl+=sb[k]; }
+    c = c||1;
+    return [Math.round(r/c), Math.round(g/c), Math.round(bl/c)];
+  });
+  cols.sort((a,b) => (a[0]*299+a[1]*587+a[2]*114) - (b[0]*299+b[1]*587+b[2]*114));
+  const pal = new Uint8Array(cols.length*3);
+  cols.forEach((c,i) => { pal[i*3]=c[0]; pal[i*3+1]=c[1]; pal[i*3+2]=c[2]; });
+  return pal;
+}
+
+function indexize(data, w, h, pal, dither){
+  const n = pal.length/3, out = new Uint8Array(w*h), lut = new Int16Array(32768).fill(-1);
+  const find = (r,g,b) => {
+    const key = ((r>>3)<<10) | ((g>>3)<<5) | (b>>3);
+    let v = lut[key];
+    if (v < 0){
+      const cr = (r>>3<<3)+4, cg = (g>>3<<3)+4, cb = (b>>3<<3)+4;
+      let best = 1e9; v = 0;
+      for (let i = 0; i < n; i++){
+        const dr = cr-pal[i*3], dg = cg-pal[i*3+1], db = cb-pal[i*3+2];
+        const d = dr*dr*2 + dg*dg*4 + db*db*3;
+        if (d < best){ best = d; v = i; }
+      }
+      lut[key] = v;
+    }
+    return v;
+  };
+  if (!dither){
+    for (let p = 0, i = 0; p < w*h; p++, i += 4) out[p] = find(data[i], data[i+1], data[i+2]);
+    return out;
+  }
+  const S = 0.7;
+  let er = new Float32Array((w+2)*3), nr = new Float32Array((w+2)*3);
+  for (let y = 0; y < h; y++){
+    nr.fill(0);
+    for (let x = 0; x < w; x++){
+      const i = (y*w+x)*4, e = (x+1)*3;
+      let r = data[i]+er[e], g = data[i+1]+er[e+1], b = data[i+2]+er[e+2];
+      r = r<0?0:r>255?255:r; g = g<0?0:g>255?255:g; b = b<0?0:b>255?255:b;
+      const idx = find(r|0, g|0, b|0); out[y*w+x] = idx;
+      const dr = (r-pal[idx*3])*S, dg = (g-pal[idx*3+1])*S, db = (b-pal[idx*3+2])*S;
+      er[e+3] += dr*7/16; er[e+4] += dg*7/16; er[e+5] += db*7/16;
+      nr[e-3] += dr*3/16; nr[e-2] += dg*3/16; nr[e-1] += db*3/16;
+      nr[e]   += dr*5/16; nr[e+1] += dg*5/16; nr[e+2] += db*5/16;
+      nr[e+3] += dr/16;   nr[e+4] += dg/16;   nr[e+5] += db/16;
+    }
+    const t = er; er = nr; nr = t;
+  }
+  return out;
+}
+
+/* ---------- Encoder PNG berpalet ---------- */
+const crcT = (() => { const t = new Uint32Array(256); for (let n=0;n<256;n++){ let c=n; for (let k=0;k<8;k++) c = c&1 ? 0xEDB88320^(c>>>1) : c>>>1; t[n]=c>>>0; } return t; })();
+function crc32(buf){ let c = 0xFFFFFFFF; for (let i=0;i<buf.length;i++) c = crcT[(c^buf[i])&255]^(c>>>8); return (c^0xFFFFFFFF)>>>0; }
+function chunk(type, data){
+  const out = new Uint8Array(12+data.length), dv = new DataView(out.buffer);
+  dv.setUint32(0, data.length);
+  for (let i=0;i<4;i++) out[4+i] = type.charCodeAt(i);
+  out.set(data, 8);
+  dv.setUint32(8+data.length, crc32(out.subarray(4, 8+data.length)));
+  return out;
+}
+function filterRows(idx, w, h){
+  const raw = new Uint8Array((w+1)*h);
+  for (let y = 0; y < h; y++){
+    const row = y*w, o = y*(w+1)+1;
+    let s0=0, s1=0, s2=0;
+    for (let x = 0; x < w; x++){
+      const v = idx[row+x];
+      const a = x ? idx[row+x-1] : 0, b = y ? idx[row-w+x] : 0;
+      const d1 = (v-a)<<24>>24, d2 = (v-b)<<24>>24, d0 = v<<24>>24;
+      s0 += d0<0?-d0:d0; s1 += d1<0?-d1:d1; s2 += d2<0?-d2:d2;
+    }
+    let f = 0, m = s0;
+    if (s1 < m){ f = 1; m = s1; }
+    if (s2 < m && y){ f = 2; }
+    raw[y*(w+1)] = f;
+    for (let x = 0; x < w; x++){
+      const v = idx[row+x];
+      const a = x ? idx[row+x-1] : 0, b = y ? idx[row-w+x] : 0;
+      raw[o+x] = f===0 ? v : f===1 ? (v-a)&255 : (v-b)&255;
+    }
+  }
+  return raw;
+}
+async function zlib(bytes){
+  const cs = new CompressionStream('deflate');
+  const stream = new Blob([bytes]).stream().pipeThrough(cs);
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+async function encodeIndexedPNG(idx, w, h, pal){
+  const ihdr = new Uint8Array(13), dv = new DataView(ihdr.buffer);
+  dv.setUint32(0, w); dv.setUint32(4, h); ihdr[8] = 8; ihdr[9] = 3;
+  const idat = await zlib(filterRows(idx, w, h));
+  const parts = [new Uint8Array([137,80,78,71,13,10,26,10]), chunk('IHDR', ihdr), chunk('PLTE', pal), chunk('IDAT', idat), chunk('IEND', new Uint8Array(0))];
+  return new Blob(parts, {type:'image/png'});
+}
+// Cadangan bila CompressionStream tidak tersedia
+function fallbackPNG(idx, w, h, pal){
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const x = c.getContext('2d'), im = x.createImageData(w, h);
+  for (let p = 0; p < w*h; p++){ const k = idx[p]*3; im.data[p*4]=pal[k]; im.data[p*4+1]=pal[k+1]; im.data[p*4+2]=pal[k+2]; im.data[p*4+3]=255; }
+  x.putImageData(im, 0, 0);
+  return new Promise(res => c.toBlob(res, 'image/png'));
+}
+
+/* ---------- Potret JPG ---------- */
+const toBlob = (cv, type, q) => new Promise(res => cv.toBlob(res, type, q));
+
+async function makePortrait(img, limitBytes){
+  const [iw, ih] = dimsOf(img);
+  const cap = Math.min(1, 1200/ih);           // maksimal tinggi 1200 px
+  let best = null;
+  for (const sc of [1, 0.85, 0.7, 0.6, 0.5, 0.4]){
+    const w = Math.max(1, Math.round(iw*cap*sc)), h = Math.max(1, Math.round(ih*cap*sc));
+    const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+    const x = cv.getContext('2d');
+    x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high';
+    x.fillStyle = '#fff'; x.fillRect(0, 0, w, h);
+    x.drawImage(img, 0, 0, w, h);
+    setStatus(`Mengoptimalkan JPG… ${w}×${h}`);
+    await tick();
+    let lo = 0.5, hi = 0.92, fit = null;
+    const top = await toBlob(cv, 'image/jpeg', hi);
+    if (top.size <= limitBytes) return {blob: top, w, h, q: hi, ok: true};
+    const low = await toBlob(cv, 'image/jpeg', lo);
+    if (!best || low.size < best.blob.size) best = {blob: low, w, h, q: lo};
+    if (low.size > limitBytes) continue;       // belum cukup, kecilkan resolusi
+    fit = {blob: low, w, h, q: lo};
+    for (let i = 0; i < 6; i++){
+      const mid = (lo+hi)/2, b = await toBlob(cv, 'image/jpeg', mid);
+      if (b.size <= limitBytes){ fit = {blob: b, w, h, q: mid}; lo = mid; } else hi = mid;
+    }
+    return {...fit, ok: true};
+  }
+  return {...best, ok: false};
+}
+
+let outURLP = null;
+async function renderPortrait(){
+  const limitKB = Math.max(20, parseInt($('limitP').value, 10) || 100);
+  const r = await makePortrait(currentImg, limitKB*1000);
+  if (outURLP) URL.revokeObjectURL(outURLP);
+  outURLP = URL.createObjectURL(r.blob);
+  $('previewP').src = outURLP;
+  const dl = $('downloadP'); dl.href = outURLP;
+  dl.download = currentName.replace(/\.[^.]+$/, '') + '-potret.jpg';
+  $('metaP').innerHTML =
+    `<span>Ukuran: <b class="${r.ok?'ok':'warn'}">${(r.blob.size/1000).toFixed(1)} KB</b> ${r.ok?'✓':'(melebihi batas)'}</span>` +
+    `<span>Dimensi: <b>${r.w}×${r.h}</b></span>` +
+    `<span>Kualitas: <b>${Math.round(r.q*100)}</b></span>`;
+  return r.ok;
+}
+
+/* ---------- Proses utama ---------- */
+async function makeOutput(img, limitBytes){
+  const scales = [1, 0.9, 0.8, 0.7, 0.6];
+  const plans = [[256,true],[192,true],[128,true],[128,false],[64,false],[48,false],[32,false]];
+  let best = null;
+  for (const sc of scales){
+    const W = Math.round(W0*sc), H = Math.round(H0*sc);
+    const cv = compose(img, W, H);
+    const data = cv.getContext('2d').getImageData(0, 0, W, H).data;
+    for (const [cols, dith] of plans){
+      setStatus(`Mengoptimalkan… ${W}×${H}, ${cols} warna${dith?', dither':''}`);
+      await tick();
+      const pal = buildPalette(data, cols);
+      const idx = indexize(data, W, H, pal, dith);
+      const blob = window.CompressionStream ? await encodeIndexedPNG(idx, W, H, pal) : await fallbackPNG(idx, W, H, pal);
+      const res = {blob, W, H, cols: pal.length/3, dith};
+      if (!best || blob.size < best.blob.size) best = res;
+      if (blob.size <= limitBytes) return {...res, ok:true};
+    }
+  }
+  return {...best, ok:false};
+}
+
+async function process(){
+  if (!currentImg || busy) return;
+  busy = true;
+  const limitKB = Math.max(50, parseInt($('limit').value, 10) || 300);
+  const limit = limitKB * 1000; // pakai 1 KB = 1000 byte agar aman
+  try {
+    const [iw, ih] = dimsOf(currentImg);
+    const ratioNote = Math.abs(iw/ih - 2/3) > 0.03 ? ' Rasio gambar bukan 2:3, tinggi tetap disamakan dengan kanvas.' : '';
+    const r = await makeOutput(currentImg, limit);
+    if (outURL) URL.revokeObjectURL(outURL);
+    outURL = URL.createObjectURL(r.blob);
+    $('preview').src = outURL;
+    const dl = $('download'); dl.href = outURL;
+    dl.download = currentName.replace(/\.[^.]+$/, '') + '-og.png';
+    const kb = (r.blob.size/1000).toFixed(1);
+    $('meta').innerHTML =
+      `<span>Ukuran: <b class="${r.ok?'ok':'warn'}">${kb} KB</b> ${r.ok?'✓':'(melebihi batas)'}</span>` +
+      `<span>Dimensi: <b>${r.W}×${r.H}</b></span>` +
+      `<span>Warna: <b>${r.cols}</b></span>`;
+    $('result').style.display = 'block';
+    const okP = await renderPortrait();
+    const allOk = r.ok && okP;
+    setStatus(allOk ? ('Selesai.' + ratioNote) : ('Salah satu hasil masih di atas batas ukuran. Coba naikkan batasnya.' + ratioNote), !allOk);
+  } catch (e){
+    console.error(e); setStatus('Terjadi kesalahan saat memproses gambar.', true);
+  } finally { busy = false; }
+}
+
+async function handleFile(file){
+  if (!file || !file.type.startsWith('image/')){ setStatus('File harus berupa gambar JPG.', true); return; }
+  setStatus('Membaca gambar…');
+  try {
+    currentImg = await loadImage(file);
+    currentName = file.name || 'gambar.jpg';
+    await process();
+  } catch (e){ setStatus('Gambar tidak bisa dibaca.', true); }
+}
+
+$('file').addEventListener('change', e => handleFile(e.target.files[0]));
+$('limit').addEventListener('change', process);
+$('limitP').addEventListener('change', process);
+const drop = $('drop');
+['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e => handleFile(e.dataTransfer.files[0]));
+</script>
+</body>
+</html>
