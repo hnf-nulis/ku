@@ -29,6 +29,9 @@
   #status{margin-top:16px;font-size:.92rem;color:var(--muted);min-height:1.4em}
   #status.err{color:var(--warn)}
   #result{display:none;margin-top:20px}
+  .nameinfo{font-size:.88rem;color:var(--muted)}
+  .nameinfo b{color:var(--ink)}
+  input[type=file]#htmlFile{font:inherit;font-size:.9rem;max-width:100%}
   #result h2{font-size:1rem;margin:0 0 10px}
   #result h2.second{margin-top:32px;padding-top:24px;border-top:1px solid var(--line)}
   #previewP{display:block;width:100%;max-width:320px;height:auto;border-radius:10px;border:1px solid var(--line);background:#888}
@@ -54,10 +57,15 @@
       <input type="file" id="file" accept="image/jpeg,.jpg,.jpeg">
     </label>
     <div class="row">
+      <label for="htmlFile">File HTML (opsional, nama file hasil mengikuti ini)</label>
+      <input type="file" id="htmlFile" accept=".html,.htm,text/html">
+      <span id="nameInfo" class="nameinfo"></span>
+    </div>
+    <div class="row">
       <label for="limit">Batas PNG landscape (KB)</label>
-      <input type="number" id="limit" value="300" min="50" max="2000" step="10">
+      <input type="number" id="limit" value="100" min="50" max="2000" step="10">
       <label for="limitP">Batas JPG potret (KB)</label>
-      <input type="number" id="limitP" value="100" min="20" max="1000" step="10">
+      <input type="number" id="limitP" value="50" min="20" max="1000" step="10">
     </div>
     <div id="status" role="status" aria-live="polite"></div>
 
@@ -81,6 +89,20 @@ const W0 = 1200, H0 = 630;
 const $ = id => document.getElementById(id);
 let currentImg = null, currentName = 'gambar', outURL = null, busy = false;
 
+/* ---------- Penamaan file hasil ---------- */
+let htmlBase = null;
+const stripExt = n => n.replace(/\.[^.]+$/, '');
+function outName(ext){
+  const base = htmlBase || stripExt(currentName) || 'gambar';
+  return base + '.' + ext;
+}
+function refreshNames(){
+  $('nameInfo').innerHTML = htmlBase
+    ? `Hasil: <b>${htmlBase}.png</b> dan <b>${htmlBase}.jpg</b>`
+    : 'Tanpa file HTML, nama mengikuti nama gambar.';
+  if ($('download').getAttribute('href')) $('download').download = outName('png');
+  if ($('downloadP').getAttribute('href')) $('downloadP').download = outName('jpg');
+}
 function setStatus(msg, err){ const s=$('status'); s.textContent=msg||''; s.className=err?'err':''; }
 const tick = () => new Promise(r => setTimeout(r, 0));
 
@@ -279,7 +301,7 @@ async function makePortrait(img, limitBytes){
   const [iw, ih] = dimsOf(img);
   const cap = Math.min(1, 1200/ih);           // maksimal tinggi 1200 px
   let best = null;
-  for (const sc of [1, 0.85, 0.7, 0.6, 0.5, 0.4]){
+  for (const sc of [1, 0.85, 0.7, 0.6, 0.5, 0.4, 0.3]){
     const w = Math.max(1, Math.round(iw*cap*sc)), h = Math.max(1, Math.round(ih*cap*sc));
     const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
     const x = cv.getContext('2d');
@@ -312,7 +334,7 @@ async function renderPortrait(){
   outURLP = URL.createObjectURL(r.blob);
   $('previewP').src = outURLP;
   const dl = $('downloadP'); dl.href = outURLP;
-  dl.download = currentName.replace(/\.[^.]+$/, '') + '-potret.jpg';
+  dl.download = outName('jpg');
   $('metaP').innerHTML =
     `<span>Ukuran: <b class="${r.ok?'ok':'warn'}">${(r.blob.size/1000).toFixed(1)} KB</b> ${r.ok?'✓':'(melebihi batas)'}</span>` +
     `<span>Dimensi: <b>${r.w}×${r.h}</b></span>` +
@@ -322,8 +344,8 @@ async function renderPortrait(){
 
 /* ---------- Proses utama ---------- */
 async function makeOutput(img, limitBytes){
-  const scales = [1, 0.9, 0.8, 0.7, 0.6];
-  const plans = [[256,true],[192,true],[128,true],[128,false],[64,false],[48,false],[32,false]];
+  const scales = [1, 0.9, 0.8, 0.7, 0.6, 0.5];
+  const plans = [[256,true],[192,true],[128,true],[128,false],[64,false],[48,false],[32,false],[24,false],[16,false]];
   let best = null;
   for (const sc of scales){
     const W = Math.round(W0*sc), H = Math.round(H0*sc);
@@ -356,7 +378,7 @@ async function process(){
     outURL = URL.createObjectURL(r.blob);
     $('preview').src = outURL;
     const dl = $('download'); dl.href = outURL;
-    dl.download = currentName.replace(/\.[^.]+$/, '') + '-og.png';
+    dl.download = outName('png');
     const kb = (r.blob.size/1000).toFixed(1);
     $('meta').innerHTML =
       `<span>Ukuran: <b class="${r.ok?'ok':'warn'}">${kb} KB</b> ${r.ok?'✓':'(melebihi batas)'}</span>` +
@@ -382,6 +404,12 @@ async function handleFile(file){
 }
 
 $('file').addEventListener('change', e => handleFile(e.target.files[0]));
+$('htmlFile').addEventListener('change', e => {
+  const f = e.target.files[0];
+  htmlBase = f ? stripExt(f.name) : null;
+  refreshNames();
+});
+refreshNames();
 $('limit').addEventListener('change', process);
 $('limitP').addEventListener('change', process);
 const drop = $('drop');
