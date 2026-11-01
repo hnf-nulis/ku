@@ -41,6 +41,7 @@
     /* --s = faktor perbesaran (diatur JS) untuk mode desktop di layar sentuh */
     --s: 1;
     --page-h: min(100vh, calc(1008px * var(--s)));
+    --page-h: min(100dvh, calc(1008px * var(--s)));  /* tinggi layar yang terlihat (bar alamat ponsel) */
 }
 
 /* ===== Tema GELAP: hanya aktif jika pembaca mengetuk tombol tema ===== */
@@ -84,7 +85,7 @@
 .toast {
     position: fixed;
     left: 50%;
-    bottom: calc(90px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(70px + env(safe-area-inset-bottom, 0px));
     transform: translateX(-50%);
     background: var(--btn-active-bg);
     color: var(--btn-active-text);
@@ -271,7 +272,7 @@ blockquote {
 }
 
 .reader-footer {
-    height: 54px;
+    height: 46px;
     background-color: var(--bar-bg);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -353,7 +354,7 @@ body.no-select article a,
 body.no-select article a * { pointer-events: auto; }
 
 /* Bar bawah hanya 54px (tanpa panel keterbacaan) */
-article { padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px)); }
+article { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
 
 /* ---------- Halaman sampul (portrait, gambar dari artikel/cover/) ---------- */
 .cover-page { display: none; overflow: hidden; background: var(--bg, #FBF8F3); }
