@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tafsir Surah An-Nisa Ayat 90</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f4f6f8;
+      color: #2d3748;
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 12px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+      min-height: 80vh;
+    }
+
+    header {
+      background-color: #1a365d;
+      color: #ffffff;
+      padding: 16px 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .content-area {
+      padding: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .page {
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .arabic {
+      font-family: 'Amiri', 'Traditional Arabic', 'Scheherazade', serif;
+      font-size: 1.35rem;
+      direction: rtl;
+      text-align: right;
+      line-height: 2.2;
+      color: #1a202c;
+      margin-bottom: 16px;
+      background: #f7fafc;
+      padding: 16px;
+      border-radius: 8px;
+      border-right: 4px solid #2b6cb0;
+    }
+
+    .translation {
+      font-style: italic;
+      color: #4a5568;
+      background: #edf2f7;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      color: #2b6cb0;
+      margin-bottom: 12px;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 6px;
+    }
+
+    .uraian {
+      font-size: 1rem;
+      color: #2d3748;
+      text-align: justify;
+    }
+
+    blockquote {
+      background-color: #f7fafc;
+      border-left: 3px solid #4a5568;
+      margin: 10px 0;
+      padding: 10px 14px;
+      font-style: italic;
+      color: #2d3748;
+    }
+
+    ol {
+      margin-left: 20px;
+      margin-top: 8px;
+    }
+
+    li {
+      margin-bottom: 6px;
+    }
+
+    .pertanyaan-box {
+      background-color: #ebf8ff;
+      border-left: 4px solid #3182ce;
+      padding: 16px;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .pertanyaan-title {
+      font-weight: bold;
+      color: #2b6cb0;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .pertanyaan-text {
+      font-size: 1.05rem;
+      color: #1a202c;
+      font-weight: 600;
+    }
+
+    .final-page {
+      text-align: center;
+      padding: 20px 10px;
+    }
+
+    .final-page p {
+      font-size: 1.1rem;
+      margin-bottom: 24px;
+      color: #4a5568;
+      font-weight: 500;
+    }
+
+    .next-link-btn {
+      display: inline-block;
+      background-color: #276749;
+      color: #ffffff;
+      text-decoration: none;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: background-color 0.2s;
+    }
+
+    .next-link-btn:active {
+      background-color: #1e4e37;
+    }
+
+    footer {
+      padding: 16px 20px;
+      background-color: #f7fafc;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 12px 16px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .btn-prev {
+      background-color: #e2e8f0;
+      color: #4a5568;
+    }
+
+    .btn-prev:active {
+      background-color: #cbd5e0;
+    }
+
+    .btn-next {
+      background-color: #3182ce;
+      color: #ffffff;
+    }
+
+    .btn-next:active {
+      background-color: #2b6cb0;
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .page-indicator {
+      font-size: 0.85rem;
+      color: #718096;
+      text-align: center;
+      padding-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Tafsir Surah An-Nisa Ayat 90</h1>
+  </header>
+
+  <div class="content-area">
+    <!-- Halaman 1: Ayat & Terjemah -->
+    <div class="page active" id="page-1">
+      <h2 class="section-title">Surah An-Nisa: 90</h2>
+      <div class="arabic">
+        إِلَّا ٱلَّذِينَ يَصِلُونَ إِلَىٰ قَوْمٍۭ بَيْنَكُمْ وَبَيْنَهُم مِّيثَٰقٌ أَوْ جَآءُوكُمْ حَصِرَتْ صُدُورُهُمْ أَن يُقَٰتِلُوكُمْ أَوْ يُقَٰتِلُوا۟ قَوْمَهُمْ ۚ وَلَوْ شَآءَ ٱللَّهُ لَسَلَّطَهُمْ عَلَيْكُمْ فَلَقَٰتَلُوكُمْ ۚ فَإِنِ ٱعْتَزَلُوكُمْ فَلَمْ يُقَٰتِلُوكُمْ وَأَلْقَوْا۟ إِلَيْكُمُ ٱلسَّلَمَ فَمَا جَعَلَ ٱللَّهُ لَكُمْ عَلَيْهِمْ سَبِيلًا
+      </div>
+      <div class="translation">
+        “Kecuali orang-orang yang meminta perlindungan kepada suatu kaum, yang antara kamu dan kaum itu telah ada perjanjian (damai), atau orang-orang yang datang kepada kamu sedang hati mereka merasa keberatan untuk memerangi kamu dan (tidak pula) memerangi kaumnya. Kalau Allah menghendaki, niscaya Allah memberi kekuasaan kepada mereka terhadap kamu, kelak mereka memerangimu. Tetapi jika mereka membiarkan kamu, dan tidak memerangi kamu serta menawarkan perdamaian kepada kamu, maka Allah tidak memberikan jalan bagimu (untuk memerangi) mereka.”
+      </div>
+    </div>
+
+    <!-- Halaman 2: Bagian 1 Uraian -->
+    <div class="page" id="page-2">
+      <h2 class="section-title">Bagian 1: Pengecualian Hukum dan Perlindungan Pihak Ketiga</h2>
+      <div class="uraian">
+        Setelah pada ayat 89 Allah memberikan perintah tegas untuk menawan dan membunuh kaum munafik yang terang-terangan memusuhi dan memerangi umat Islam, Allah memberikan pengecualian yang sangat adil pada awal ayat 90. Ayat ini berbunyi:<br><br>
+        <blockquote>“Kecuali orang-orang yang meminta perlindungan kepada suatu kaum, yang antara kamu dan kaum itu telah ada perjanjian (damai)...”</blockquote><br>
+        Ibnu Katsir menjelaskan bahwa aturan perang dan ketegasan hukum tidak boleh diterapkan secara sembarangan. Jika ada sebagian dari mereka yang melarikan diri atau bernaung di bawah perlindungan kabilah/suatu kaum yang telah terikat perjanjian damai (pakta non-agresi) dengan Nabi Muhammad ﷺ, maka kaum muslimin wajib menghormati perjanjian tersebut.
+      </div>
+    </div>
+
+    <!-- Halaman 3: Bagian 1 Pertanyaan -->
+    <div class="page" id="page-3">
+      <div class="pertanyaan-box">
+        <div class="pertanyaan-title">Pertanyaan</div>
+        <div class="pertanyaan-text">
+          Lantas, bagaimana dengan kelompok munafik atau musuh lain yang datang kepada kaum muslimin dalam keadaan ragu-ragu—mereka tidak ingin memerangi kaum muslimin, tetapi juga tertekan oleh kaum mereka sendiri? Apa ketentuan hukum bagi kelompok ini?
+        </div>
+      </div>
+    </div>
+
+    <!-- Halaman 4: Bagian 2 Uraian -->
+    <div class="page" id="page-4">
+      <h2 class="section-title">Bagian 2: Kelompok Ragu-Ragu dan Netralitas Paksa</h2>
+      <div class="uraian">
+        Lanjutan ayat 90 memuat kelompok kedua yang mendapatkan pengecualian:<br><br>
+        <blockquote>“...atau orang-orang yang datang kepada kamu sedang hati mereka merasa keberatan untuk memerangi kamu dan (tidak pula) memerangi kaumnya...”</blockquote><br>
+        Ibnu Katsir menguraikan bahwa kelompok ini berada dalam posisi serba salah (dilematis). Mereka tidak memiliki niat atau semangat untuk memerangi kaum mukminin, namun di sisi lain mereka juga takut menghadapi kaum mereka sendiri yang kafir.<br><br>
+        Allah menegaskan sifat kasih sayang dan keadilan Islam: jika mereka memilih untuk bersikap pasif, menarik diri dari kancah permusuhan, dan tidak memihak musuh untuk menyerang umat Islam, maka kaum muslimin dilarang keras menyerang atau menumpah darah mereka.
+      </div>
+    </div>
+
+    <!-- Halaman 5: Bagian 2 Pertanyaan -->
+    <div class="page" id="page-5">
+      <div class="pertanyaan-box">
+        <div class="pertanyaan-title">Pertanyaan</div>
+        <div class="pertanyaan-text">
+          Jika Allah Maha Mengetahui isi hati manusia, apa hikmah di balik pengecualian ini, dan seandainya mereka benar-benar ingin hidup damai, apa yang seharusnya mereka buktikan?
+        </div>
+      </div>
+    </div>
+
+    <!-- Halaman 6: Bagian 3 Uraian -->
+    <div class="page" id="page-6">
+      <h2 class="section-title">Bagian 3: Hikmah Pengampunan dan Batasan Kekuasaan Manusia</h2>
+      <div class="uraian">
+        Bagian selanjutnya dari ayat 90 berbunyi:<br><br>
+        <blockquote>“...Kalau Allah menghendaki, niscaya Allah memberi kekuasaan kepada mereka terhadap kamu, kelak mereka memerangimu. Tetapi jika mereka membiarkan kamu, dan tidak memerangi kamu serta menawarkan perdamaian kepada kamu, maka Allah tidak memberikan jalan bagimu (untuk memerangi) mereka.”</blockquote><br>
+        Ibnu Katsir menekankan bahwa hukum Islam sangat berpijak pada fakta objektif tindakan nyata di lapangan, bukan sekadar prasangka batin. Selama pihak lain menahan diri dari agresi, tidak menyerang, dan menawarkan perdamaian (atau sikap netral), maka kaum mukminin tidak memiliki legalitas teologis untuk memulai peperangan terhadap mereka.<br><br>
+        Kekuasaan dan keselamatan umat Islam saat itu adalah karunia Allah, dan Allah menghendaki agar pertumpahan darah dihindari terhadap mereka yang tidak secara aktif memusuhi Islam.
+      </div>
+    </div>
+
+    <!-- Halaman 7: Bagian 3 Pertanyaan -->
+    <div class="page" id="page-7">
+      <div class="pertanyaan-box">
+        <div class="pertanyaan-title">Pertanyaan</div>
+        <div class="pertanyaan-text">
+          Lalu, apa kesimpulan besar yang dapat ditarik dari rangkaian ayat 88, 89, dan 90 ini mengenai strategi dan etika menghadapi kaum munafik?
+        </div>
+      </div>
+    </div>
+
+    <!-- Halaman 8: Bagian 4 Uraian -->
+    <div class="page" id="page-8">
+      <h2 class="section-title">Bagian 4: Kesimpulan Akhir Rangkaian Ayat</h2>
+      <div class="uraian">
+        Kesimpulan dari ayat 90 ini melengkapi skema hukum penanganan kaum munafik yang digariskan oleh Ibnu Katsir:<br>
+        <ol>
+          <li><strong>Ayat 88:</strong> Teguran agar kaum muslimin solid dan tidak terpecah dalam menilai hakikat kaum munafik yang telah berkhianat.</li>
+          <li><strong>Ayat 89:</strong> Instruksi tegas untuk bersikap keras, menawan, atau memerangi kaum munafik yang secara aktif berkhianat dan memerangi umat Islam.</li>
+          <li><strong>Ayat 90:</strong> Rem pelindung keadilan—membatasi ketegasan tersebut agar tidak menzalimi mereka yang bernaung di bawah perjanjian damai atau memilih bersikap netral (tidak ikut memerangi kaum muslimin).</li>
+        </ol><br>
+        Ayat ini membuktikan bahwa hukum dalam Islam senantiasa menjunjung tinggi prinsip keadilan, proporsionalitas, dan penghormatan terhadap perjanjian damai, bahkan terhadap orang-orang yang imannya masih bermasalah sekalipun.
+      </div>
+    </div>
+
+    <!-- Halaman 9: Halaman Penutup -->
+    <div class="page" id="page-9">
+      <div class="final-page">
+        <p>Sila lanjutkan ayat berikutnya</p>
+        <a href="annisa-91.html" class="next-link-btn">Ke Surah An-Nisa Ayat 91 &rarr;</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-indicator" id="pageIndicator">Halaman 1 dari 9</div>
+
+  <footer>
+    <button class="btn btn-prev" id="btnPrev" onclick="changePage(-1)">Kembali</button>
+    <button class="btn btn-next" id="btnNext" onclick="changePage(1)">Lanjutkan</button>
+  </footer>
+</div>
+
+<script>
+  let currentPage = 1;
+  const totalPages = 9;
+
+  function updatePage() {
+    document.querySelectorAll('.page').forEach(page => {
+      page.classList.remove('active');
+    });
+
+    const activePage = document.getElementById(`page-${currentPage}`);
+    if (activePage) {
+      activePage.classList.add('active');
+    }
+
+    document.getElementById('pageIndicator').innerText = `Halaman ${currentPage} dari ${totalPages}`;
+
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+
+    btnPrev.disabled = (currentPage === 1);
+    btnNext.disabled = (currentPage === totalPages);
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function changePage(direction) {
+    const newPage = currentPage + direction;
+    if (newPage >= 1 && newPage <= totalPages) {
+      currentPage = newPage;
+      updatePage();
+    }
+  }
+
+  updatePage();
+</script>
+
+</body>
+</html>
